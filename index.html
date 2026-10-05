@@ -3,1163 +3,3334 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
 <title>Our Ocean Memories</title>
 
 <style>
-*{margin:0;padding:0;box-sizing:border-box}
-html{scroll-behavior:smooth}
-body{
-    font-family:Arial,Helvetica,sans-serif;
-    background:#021522;color:#fff;overflow-x:hidden;
-    transition:background 1.5s ease;
-}
-body.deep-mode{background:#010b16}
-body.night-mode{background:#020712}
-button,a{font-family:inherit}
-a{text-decoration:none}
-img{max-width:100%;display:block}
-
-:root{
-    --deep:#021522;
-    --deep2:#03263c;
-    --ocean:#064e73;
-    --blue:#087ea4;
-    --cyan:#22d3ee;
-    --light:#baf7ff;
-    --white:#f8fafc;
-    --glass:rgba(255,255,255,.075);
-    --border:rgba(255,255,255,.14);
-}
-
-/* LOADER */
-.loader{
-    position:fixed;inset:0;
-    display:flex;align-items:center;justify-content:center;
-    background:radial-gradient(circle,rgba(34,211,238,.14),transparent 35%),#021522;
-    z-index:99999;
-    transition:opacity .9s ease,visibility .9s ease;
-}
-.loader.hide{opacity:0;visibility:hidden}
-.loader-content{text-align:center}
-.loader-ocean{font-size:65px;animation:floating 2s ease-in-out infinite}
-.loader-text{
-    margin-top:18px;color:#9deef8;
-    font-size:10px;letter-spacing:5px;
-}
-
-/* OCEAN LIGHT */
-.ocean-light{
-    position:fixed;top:-120px;left:50%;
-    width:700px;height:450px;
-    transform:translateX(-50%);
-    background:radial-gradient(ellipse,rgba(34,211,238,.16),transparent 70%);
-    pointer-events:none;z-index:1;
-    transition:opacity 2s ease;
-}
-body.deep-mode .ocean-light{opacity:.45}
-body.night-mode .ocean-light{opacity:.18}
-
-/* BUBBLES */
-.bubbles{
-    position:fixed;inset:0;overflow:hidden;
-    pointer-events:none;z-index:3;
-}
-.bubble{
-    position:absolute;bottom:-100px;
-    width:var(--size);height:var(--size);
-    border-radius:50%;
-    border:1px solid rgba(255,255,255,.25);
-    background:radial-gradient(circle at 30% 25%,rgba(255,255,255,.35),rgba(255,255,255,.03));
-    animation:bubbleRise var(--duration) linear infinite;
-    animation-delay:var(--delay);
-    left:var(--left);
-}
-@keyframes bubbleRise{
-    0%{transform:translateY(0) translateX(0) scale(.7);opacity:0}
-    10%{opacity:.65}
-    50%{transform:translateY(-50vh) translateX(35px) scale(1)}
-    100%{transform:translateY(-120vh) translateX(-30px) scale(1.2);opacity:0}
-}
 
 /* =====================================================
-   INTERACTIVE FISH
+   RESET
 ===================================================== */
-.fish-container{
-    position:fixed;
-    inset:0;
-    overflow:hidden;
-    pointer-events:none;
-    z-index:20;
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
 }
 
-.fish{
-    position:absolute;
-    width:var(--fish-size);
-    height:calc(var(--fish-size) * .62);
-    left:-180px;
-    top:var(--fish-top);
-    opacity:var(--fish-opacity);
-    pointer-events:auto;
-    cursor:grab;
-    touch-action:none;
-    user-select:none;
-    animation:fishSwim var(--fish-duration) linear infinite;
-    animation-delay:var(--fish-delay);
-    filter:drop-shadow(0 5px 9px rgba(0,0,0,.25))
-           drop-shadow(0 0 8px rgba(255,255,255,.12));
-    transform-origin:center;
+html {
+    scroll-behavior: smooth;
 }
 
-.fish.reverse{animation-name:fishSwimReverse}
-
-.fish.dragging{
-    animation:none!important;
-    cursor:grabbing;
-    opacity:1;
-    z-index:9999;
-    filter:drop-shadow(0 8px 18px rgba(0,0,0,.4))
-           drop-shadow(0 0 15px rgba(34,211,238,.3));
+body {
+    font-family: Arial, Helvetica, sans-serif;
+    background: #021522;
+    color: #fff;
+    overflow-x: hidden;
+    transition: background 1.5s ease;
 }
 
-.fish-body{
-    position:absolute;
-    left:18%;
-    top:8%;
-    width:69%;
-    height:84%;
-    border-radius:58% 48% 50% 58%;
-    background:linear-gradient(
-        135deg,
-        var(--fish-light),
-        var(--fish-color) 45%,
-        var(--fish-dark)
-    );
-    box-shadow:
-        inset -7px -7px 12px rgba(0,0,0,.18),
-        inset 7px 6px 12px rgba(255,255,255,.3);
+body.deep-mode {
+    background: #010b16;
 }
 
-/* sirip atas */
-.fish-body::before{
-    content:"";
-    position:absolute;
-    left:43%;
-    top:-22%;
-    width:28%;
-    height:35%;
-    border-radius:80% 20% 10% 10%;
-    background:var(--fish-color);
-    transform:rotate(-12deg);
-    box-shadow:inset 2px 2px 4px rgba(255,255,255,.3);
+body.night-mode {
+    background: #020712;
 }
 
-/* sirip bawah */
-.fish-body::after{
-    content:"";
-    position:absolute;
-    left:47%;
-    bottom:-19%;
-    width:25%;
-    height:28%;
-    border-radius:10% 10% 70% 30%;
-    background:var(--fish-dark);
-    transform:rotate(12deg);
+button,
+a {
+    font-family: inherit;
 }
 
-/* ekor */
-.fish-tail{
-    position:absolute;
-    left:0;
-    top:18%;
-    width:31%;
-    height:65%;
-    background:var(--fish-color);
-    clip-path:polygon(100% 50%,0 0,18% 50%,0 100%);
-    filter:drop-shadow(0 2px 3px rgba(0,0,0,.2));
+a {
+    text-decoration: none;
 }
 
-/* ekor kedua / lekukan */
-.fish-tail::after{
-    content:"";
-    position:absolute;
-    inset:8%;
-    background:var(--fish-light);
-    opacity:.28;
-    clip-path:polygon(100% 50%,0 0,18% 50%,0 100%);
+img {
+    max-width: 100%;
+    display: block;
 }
 
-/* mata */
-.fish-eye{
-    position:absolute;
-    right:17%;
-    top:25%;
-    width:calc(var(--fish-size) * .13);
-    height:calc(var(--fish-size) * .13);
-    min-width:6px;
-    min-height:6px;
-    border-radius:50%;
-    background:#fff;
-    box-shadow:0 0 4px rgba(255,255,255,.7);
-    z-index:3;
+
+/* =====================================================
+   VARIABLES
+===================================================== */
+
+:root {
+    --deep: #021522;
+    --deep2: #03263c;
+    --ocean: #064e73;
+    --blue: #087ea4;
+    --cyan: #22d3ee;
+    --light: #baf7ff;
+    --white: #f8fafc;
+
+    --glass: rgba(255,255,255,.075);
+    --border: rgba(255,255,255,.14);
 }
 
-.fish-eye::after{
-    content:"";
-    position:absolute;
-    width:42%;
-    height:42%;
-    left:29%;
-    top:29%;
-    border-radius:50%;
-    background:#071522;
-}
 
-/* insang */
-.fish-gill{
-    position:absolute;
-    right:31%;
-    top:30%;
-    width:7%;
-    height:35%;
-    border-right:2px solid rgba(0,0,0,.18);
-    border-radius:50%;
-}
+/* =====================================================
+   LOADER
+===================================================== */
 
-/* STRIPE KHUSUS IKAN NEMO */
-.fish.nemo .fish-body{
+.loader {
+    position: fixed;
+    inset: 0;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
     background:
-        linear-gradient(
-            90deg,
-            transparent 0 19%,
-            rgba(255,255,255,.95) 20% 29%,
-            transparent 30% 47%,
-            rgba(255,255,255,.95) 48% 57%,
-            transparent 58% 100%
+        radial-gradient(
+            circle,
+            rgba(34,211,238,.14),
+            transparent 35%
         ),
-        linear-gradient(
-            135deg,
-            #ff9a35,
-            #f45d22 55%,
-            #c93418
+        #021522;
+
+    z-index: 99999;
+
+    transition:
+        opacity .9s ease,
+        visibility .9s ease;
+}
+
+.loader.hide {
+    opacity: 0;
+    visibility: hidden;
+}
+
+.loader-content {
+    text-align: center;
+}
+
+.loader-ocean {
+    font-size: 65px;
+
+    animation:
+        floating 2s ease-in-out infinite;
+}
+
+.loader-text {
+    margin-top: 18px;
+
+    color: #9deef8;
+
+    font-size: 10px;
+
+    letter-spacing: 5px;
+}
+
+
+/* =====================================================
+   OCEAN LIGHT
+===================================================== */
+
+.ocean-light {
+    position: fixed;
+
+    top: -120px;
+    left: 50%;
+
+    width: 700px;
+    height: 450px;
+
+    transform: translateX(-50%);
+
+    background:
+        radial-gradient(
+            ellipse,
+            rgba(34,211,238,.16),
+            transparent 70%
+        );
+
+    pointer-events: none;
+
+    z-index: 1;
+
+    transition:
+        opacity 2s ease;
+}
+
+body.deep-mode .ocean-light {
+    opacity: .45;
+}
+
+body.night-mode .ocean-light {
+    opacity: .18;
+}
+
+
+/* =====================================================
+   BUBBLES
+===================================================== */
+
+.bubbles {
+    position: fixed;
+    inset: 0;
+
+    overflow: hidden;
+
+    pointer-events: none;
+
+    z-index: 3;
+}
+
+.bubble {
+    position: absolute;
+
+    bottom: -100px;
+
+    width: var(--size);
+    height: var(--size);
+
+    border-radius: 50%;
+
+    border: 1px solid rgba(255,255,255,.25);
+
+    background:
+        radial-gradient(
+            circle at 30% 25%,
+            rgba(255,255,255,.35),
+            rgba(255,255,255,.03)
+        );
+
+    animation:
+        bubbleRise var(--duration) linear infinite;
+
+    animation-delay: var(--delay);
+
+    left: var(--left);
+}
+
+@keyframes bubbleRise {
+
+    0% {
+        transform:
+            translateY(0)
+            translateX(0)
+            scale(.7);
+
+        opacity: 0;
+    }
+
+    10% {
+        opacity: .65;
+    }
+
+    50% {
+        transform:
+            translateY(-50vh)
+            translateX(35px)
+            scale(1);
+    }
+
+    100% {
+        transform:
+            translateY(-120vh)
+            translateX(-30px)
+            scale(1.2);
+
+        opacity: 0;
+    }
+}
+
+
+/* =====================================================
+   CURSOR BUBBLES
+===================================================== */
+
+.cursor-bubble {
+    position: fixed;
+
+    width: var(--cursor-size);
+    height: var(--cursor-size);
+
+    left: var(--cursor-x);
+    top: var(--cursor-y);
+
+    border-radius: 50%;
+
+    border: 1px solid rgba(255,255,255,.25);
+
+    pointer-events: none;
+
+    z-index: 9998;
+
+    animation:
+        cursorBubble 1.8s ease-out forwards;
+}
+
+@keyframes cursorBubble {
+
+    0% {
+        opacity: .65;
+        transform: scale(.5);
+    }
+
+    100% {
+        opacity: 0;
+        transform:
+            translateY(-70px)
+            scale(1.4);
+    }
+}
+
+
+/* =====================================================
+   COLORFUL FISH
+===================================================== */
+
+.fish-container {
+    position: fixed;
+    inset: 0;
+
+    overflow: hidden;
+
+    pointer-events: none;
+
+    z-index: 4;
+}
+
+.fish {
+    position: absolute;
+
+    width: var(--fish-size);
+    height: calc(var(--fish-size) * .55);
+
+    left: -120px;
+    top: var(--fish-top);
+
+    opacity: var(--fish-opacity);
+
+    animation:
+        fishSwim var(--fish-duration) linear infinite;
+
+    animation-delay: var(--fish-delay);
+
+    filter:
+        drop-shadow(
+            0 0 7px
+            rgba(255,255,255,.18)
         );
 }
 
-/* ikan mas koki */
-.fish.goldfish .fish-body{
-    border-radius:62% 45% 52% 62%;
+.fish-body {
+    position: absolute;
+
+    left: 20%;
+    top: 10%;
+
+    width: 65%;
+    height: 80%;
+
+    border-radius:
+        55% 45% 45% 55%;
+
     background:
-        radial-gradient(circle at 70% 35%,#ffd86b 0 7%,transparent 8%),
-        linear-gradient(135deg,#ffd166,#ff9f1c 48%,#e85d04);
+        var(--fish-color);
+
+    box-shadow:
+        inset -5px -4px 8px
+        rgba(0,0,0,.15),
+
+        inset 5px 4px 8px
+        rgba(255,255,255,.3);
 }
 
-.fish.goldfish .fish-tail{
-    background:linear-gradient(135deg,#ffcf55,#e85d04);
-    clip-path:polygon(100% 50%,0 0,22% 50%,0 100%);
+.fish-tail {
+    position: absolute;
+
+    left: 0;
+    top: 25%;
+
+    width: 0;
+    height: 0;
+
+    border-top:
+        calc(var(--fish-size) * .16)
+        solid transparent;
+
+    border-bottom:
+        calc(var(--fish-size) * .16)
+        solid transparent;
+
+    border-right:
+        calc(var(--fish-size) * .25)
+        solid var(--fish-color);
 }
 
-/* bubble kecil dari ikan */
-.fish::after{
-    content:"";
-    position:absolute;
-    width:calc(var(--fish-size) * .11);
-    height:calc(var(--fish-size) * .11);
-    min-width:4px;
-    min-height:4px;
-    border:1px solid rgba(255,255,255,.5);
-    border-radius:50%;
-    left:-8%;
-    top:5%;
-    animation:fishBubble 2s ease-in-out infinite;
-}
-@keyframes fishBubble{
-    0%,100%{transform:translateY(5px);opacity:0}
-    40%{opacity:.7}
-    100%{transform:translateY(-16px) scale(1.3);opacity:0}
+.fish-eye {
+    position: absolute;
+
+    right: 25%;
+    top: 28%;
+
+    width: 5px;
+    height: 5px;
+
+    border-radius: 50%;
+
+    background: white;
 }
 
-@keyframes fishSwim{
-    0%{transform:translateX(-180px) translateY(0) scaleX(1)}
-    20%{transform:translateX(20vw) translateY(-22px) scaleX(1)}
-    40%{transform:translateX(45vw) translateY(18px) scaleX(1)}
-    60%{transform:translateX(70vw) translateY(-20px) scaleX(1)}
-    80%{transform:translateX(95vw) translateY(13px) scaleX(1)}
-    100%{transform:translateX(125vw) translateY(0) scaleX(1)}
-}
-@keyframes fishSwimReverse{
-    0%{transform:translateX(120vw) translateY(0) scaleX(-1)}
-    25%{transform:translateX(90vw) translateY(18px) scaleX(-1)}
-    50%{transform:translateX(55vw) translateY(-18px) scaleX(-1)}
-    75%{transform:translateX(25vw) translateY(14px) scaleX(-1)}
-    100%{transform:translateX(-180px) translateY(0) scaleX(-1)}
+.fish-eye::after {
+    content: "";
+
+    position: absolute;
+
+    width: 2px;
+    height: 2px;
+
+    left: 1.5px;
+    top: 1.5px;
+
+    border-radius: 50%;
+
+    background: #021522;
 }
 
-/* JELLYFISH */
-.jelly-container{
-    position:fixed;inset:0;
-    pointer-events:none;overflow:hidden;z-index:4;
-}
-.jelly{
-    position:absolute;
-    width:var(--jelly-size);
-    height:calc(var(--jelly-size) * .9);
-    left:var(--jelly-left);
-    top:var(--jelly-top);
-    opacity:.38;
-    animation:jellyFloat var(--jelly-duration) ease-in-out infinite;
-    animation-delay:var(--jelly-delay);
-    filter:drop-shadow(0 0 15px var(--jelly-color));
-}
-.jelly-head{
-    position:absolute;top:0;left:10%;
-    width:80%;height:55%;
-    border-radius:50% 50% 35% 35%;
-    background:linear-gradient(135deg,rgba(255,255,255,.35),var(--jelly-color));
-}
-.jelly-head::after{
-    content:"";position:absolute;inset:6px;
-    border-radius:inherit;
-    border:1px solid rgba(255,255,255,.35);
-}
-.jelly-tentacles{
-    position:absolute;top:45%;left:20%;
-    width:60%;height:55%;
-}
-.jelly-tentacles span{
-    position:absolute;top:0;
-    width:2px;height:100%;
-    border-radius:20px;
-    background:var(--jelly-color);
-    box-shadow:0 0 7px var(--jelly-color);
-}
-.jelly-tentacles span:nth-child(1){left:10%}
-.jelly-tentacles span:nth-child(2){left:35%}
-.jelly-tentacles span:nth-child(3){left:60%}
-.jelly-tentacles span:nth-child(4){left:85%}
-@keyframes jellyFloat{
-    0%,100%{transform:translateY(0) translateX(0)}
-    50%{transform:translateY(-45px) translateX(25px)}
-}
+@keyframes fishSwim {
 
-/* STARS */
-.stars{
-    position:fixed;inset:0;
-    pointer-events:none;opacity:0;
-    transition:opacity 2s ease;z-index:2;
-}
-body.night-mode .stars{opacity:1}
-.star{
-    position:absolute;
-    width:var(--star-size);height:var(--star-size);
-    left:var(--star-left);top:var(--star-top);
-    border-radius:50%;background:#fff;
-    box-shadow:0 0 8px rgba(255,255,255,.8);
-    animation:twinkle var(--star-speed) ease-in-out infinite;
-    animation-delay:var(--star-delay);
-}
-@keyframes twinkle{
-    0%,100%{opacity:.25}
-    50%{opacity:1}
-}
-
-/* NAVBAR */
-.navbar{
-    position:fixed;top:18px;left:50%;
-    transform:translateX(-50%);
-    width:min(94%,1050px);
-    padding:13px 18px;
-    display:flex;align-items:center;justify-content:space-between;
-    background:rgba(2,21,34,.58);
-    border:1px solid var(--border);
-    backdrop-filter:blur(20px);
-    border-radius:50px;z-index:1000;
-}
-.logo{font-weight:700;font-size:14px;letter-spacing:.5px}
-.logo span{color:var(--cyan)}
-.nav-links{list-style:none;display:flex;gap:25px}
-.nav-links a{color:#d7f7fb;font-size:11px;transition:.3s}
-.nav-links a:hover{color:var(--cyan)}
-.menu-btn{
-    display:none;background:none;border:none;
-    color:#fff;font-size:22px;cursor:pointer;
-}
-
-/* HERO */
-.hero{
-    min-height:100vh;position:relative;
-    display:flex;justify-content:center;align-items:center;
-    text-align:center;overflow:hidden;
-    background:
-        radial-gradient(circle at 50% 25%,rgba(34,211,238,.15),transparent 30%),
-        linear-gradient(180deg,#021522,#043b59 60%,#03243a);
-    transition:background 2s ease;
-}
-body.deep-mode .hero{
-    background:
-        radial-gradient(circle at 50% 25%,rgba(8,126,164,.10),transparent 30%),
-        linear-gradient(180deg,#010c18,#02263a 65%,#011522);
-}
-body.night-mode .hero{
-    background:
-        radial-gradient(circle at 50% 25%,rgba(91,92,180,.12),transparent 30%),
-        linear-gradient(180deg,#020611,#071326 65%,#020711);
-}
-.hero-content{
-    position:relative;z-index:10;
-    width:min(850px,90%);padding-top:30px;
-}
-.hero-small{color:var(--light);font-size:10px;letter-spacing:5px;margin-bottom:22px}
-.hero h1{
-    font-size:clamp(48px,9vw,105px);
-    line-height:.9;letter-spacing:-5px;font-weight:800;
-}
-.hero h1 span{
-    display:block;color:transparent;
-    -webkit-text-stroke:1px rgba(255,255,255,.75);
-}
-.hero-description{
-    max-width:570px;margin:28px auto;
-    color:#b9dce5;line-height:1.8;font-size:13px;
-}
-.explore-btn{
-    display:inline-flex;padding:14px 25px;
-    border-radius:50px;background:#fff;color:#04334b;
-    font-size:12px;font-weight:700;transition:.3s;
-}
-.explore-btn:hover{
-    transform:translateY(-5px);
-    box-shadow:0 15px 45px rgba(34,211,238,.25);
-}
-.hero-light{
-    position:absolute;width:500px;height:500px;
-    left:50%;top:15%;transform:translateX(-50%);
-    background:radial-gradient(circle,rgba(34,211,238,.07),transparent 65%);
-    pointer-events:none;
-}
-
-/* WAVES */
-.wave{
-    position:absolute;bottom:-3px;left:-5%;
-    width:110%;height:120px;
-    background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1440 320'%3E%3Cpath fill='%23021522' d='M0,160 C180,80 300,240 480,160 C650,80 800,230 960,160 C1110,90 1260,220 1440,130 L1440,320 L0,320 Z'/%3E%3C/svg%3E") center/cover;
-    animation:waveAnimation 12s linear infinite;
-}
-@keyframes waveAnimation{
-    0%,100%{transform:translateX(0)}
-    50%{transform:translateX(-3%)}
-}
-
-/* DIVE */
-.dive-indicator{
-    position:absolute;bottom:45px;left:50%;
-    transform:translateX(-50%);
-    display:flex;flex-direction:column;align-items:center;gap:7px;
-    color:rgba(255,255,255,.6);font-size:8px;letter-spacing:3px;
-    z-index:10;animation:divePulse 2s ease-in-out infinite;
-}
-.dive-arrow{font-size:18px}
-@keyframes divePulse{
-    0%,100%{opacity:.45;transform:translateX(-50%) translateY(0)}
-    50%{opacity:1;transform:translateX(-50%) translateY(7px)}
-}
-
-/* SECTIONS */
-section{
-    position:relative;padding:120px 7%;
-    background:var(--deep);overflow:hidden;
-    transition:background 2s ease;
-}
-body.deep-mode section{background:#011522}
-body.night-mode section{background:#020914}
-.section-header{
-    text-align:center;max-width:700px;margin:0 auto 60px;
-    position:relative;z-index:10;
-}
-.section-label{color:var(--cyan);font-size:10px;letter-spacing:4px;text-transform:uppercase}
-.section-header h2{
-    margin-top:10px;font-size:clamp(32px,5vw,60px);letter-spacing:-2px;
-}
-.section-header p{
-    color:#739baa;font-size:13px;line-height:1.7;margin-top:12px;
-}
-
-/* TIME */
-.time-section{
-    background:radial-gradient(circle at center,rgba(8,126,164,.15),transparent 45%),#021522;
-    min-height:850px;display:flex;flex-direction:column;
-    justify-content:center;align-items:center;
-}
-.hourglass-area{
-    position:relative;width:330px;height:500px;
-    display:flex;justify-content:center;transition:transform 1s ease;
-}
-.hourglass-area.flip{transform:rotate(180deg)}
-.hourglass-glow{
-    position:absolute;width:280px;height:280px;top:100px;
-    background:radial-gradient(circle,rgba(34,211,238,.12),transparent 65%);
-    filter:blur(15px);
-}
-.hourglass{
-    position:relative;width:190px;height:390px;
-    filter:drop-shadow(0 0 30px rgba(34,211,238,.12));
-}
-.glass-top,.glass-bottom{
-    position:absolute;left:50%;transform:translateX(-50%);
-    width:170px;height:22px;border-radius:12px;
-    background:linear-gradient(90deg,#6ee7f7,#0b6f91,#6ee7f7);
-    box-shadow:0 0 15px rgba(34,211,238,.25);
-}
-.glass-top{top:0}.glass-bottom{bottom:0}
-.glass-body{
-    position:absolute;top:18px;bottom:18px;left:50%;
-    transform:translateX(-50%);width:150px;overflow:hidden;
-    clip-path:polygon(0 0,100% 0,72% 50%,100% 100%,0 100%,28% 50%);
-    background:linear-gradient(90deg,rgba(255,255,255,.03),rgba(255,255,255,.12),rgba(255,255,255,.03));
-    border-left:1px solid rgba(255,255,255,.18);
-    border-right:1px solid rgba(255,255,255,.18);
-}
-.sand-top{
-    position:absolute;top:18px;left:50%;transform:translateX(-50%);
-    width:85px;height:115px;
-    background:linear-gradient(180deg,#67e8f9,#0ea5c6);
-    clip-path:polygon(0 0,100% 0,67% 100%,33% 100%);
-    opacity:.9;filter:drop-shadow(0 0 8px rgba(34,211,238,.35));
-    animation:sandTop 10s linear infinite;
-}
-@keyframes sandTop{0%{height:115px}90%,100%{height:8px}}
-.sand-stream{
-    position:absolute;top:80px;left:50%;transform:translateX(-50%);
-    width:4px;height:150px;
-    background:linear-gradient(to bottom,#67e8f9,#0891b2);
-    border-radius:20px;box-shadow:0 0 10px rgba(34,211,238,.5);
-    animation:stream 2s linear infinite;
-}
-@keyframes stream{
-    0%{height:10px;opacity:.2}
-    50%{height:150px;opacity:1}
-    100%{height:150px;opacity:.2}
-}
-.sand-bottom{
-    position:absolute;bottom:22px;left:50%;transform:translateX(-50%);
-    width:110px;height:75px;
-    background:linear-gradient(180deg,#0891b2,#0e7490);
-    clip-path:polygon(15% 100%,85% 100%,60% 0,40% 0);
-    animation:sandBottom 10s linear infinite;
-    filter:drop-shadow(0 0 10px rgba(34,211,238,.3));
-}
-@keyframes sandBottom{0%{height:8px}90%,100%{height:75px}}
-.time-info{
-    margin-top:-10px;text-align:center;position:relative;z-index:10;
-}
-.time-info h3{font-size:17px;letter-spacing:3px;text-transform:uppercase}
-.time-info p{color:#739baa;font-size:11px;margin-top:8px}
-.stats{
-    display:flex;gap:18px;margin-top:25px;flex-wrap:wrap;justify-content:center;
-}
-.stat{
-    min-width:125px;padding:17px 22px;text-align:center;
-    border-radius:18px;background:rgba(255,255,255,.055);
-    border:1px solid var(--border);backdrop-filter:blur(15px);
-}
-.stat strong{display:block;font-size:25px;color:var(--light)}
-.stat span{color:#7297a4;font-size:9px;letter-spacing:1px}
-
-/* GALLERY */
-.gallery{
-    max-width:1200px;margin:auto;columns:4 220px;column-gap:16px;
-    position:relative;z-index:10;
-}
-.photo{
-    position:relative;break-inside:avoid;margin-bottom:16px;
-    border-radius:20px;overflow:hidden;cursor:pointer;
-    border:1px solid rgba(255,255,255,.08);background:#062b40;
-    transition:transform .5s ease;
-}
-.photo:hover{transform:translateY(-5px)}
-.photo img{
-    width:100%;transition:transform .6s ease,filter .5s ease;
-}
-.photo:hover img{transform:scale(1.07);filter:brightness(.72)}
-.photo-overlay{
-    position:absolute;inset:0;display:flex;align-items:flex-end;
-    padding:20px;background:linear-gradient(transparent,rgba(0,0,0,.8));
-    opacity:0;transition:.4s;
-}
-.photo:hover .photo-overlay{opacity:1}
-
-/* VIDEO */
-.video-grid{
-    max-width:1150px;margin:auto;display:grid;
-    grid-template-columns:repeat(3,1fr);gap:20px;
-    position:relative;z-index:10;
-}
-.video-card{
-    overflow:hidden;border-radius:22px;background:rgba(255,255,255,.055);
-    border:1px solid var(--border);transition:.4s;
-}
-.video-card:hover{
-    transform:translateY(-8px);border-color:rgba(34,211,238,.35);
-}
-.video-card video{
-    width:100%;display:block;aspect-ratio:16/10;object-fit:cover;background:#000;
-}
-.video-info{padding:18px}
-.video-info h3{font-size:14px}
-.video-info p{color:#7297a4;margin-top:6px;font-size:10px}
-
-/* MUSIC */
-.music-section{
-    background:radial-gradient(circle at center,rgba(8,126,164,.18),transparent 45%),#021522;
-}
-.music-player{
-    width:min(700px,95%);margin:auto;padding:25px;
-    display:flex;align-items:center;gap:22px;border-radius:28px;
-    background:rgba(255,255,255,.06);border:1px solid var(--border);
-    backdrop-filter:blur(20px);position:relative;z-index:10;
-}
-.album{width:110px;height:110px;flex-shrink:0;overflow:hidden;border-radius:20px}
-.album img{width:100%;height:100%;object-fit:cover}
-.music-info{flex:1}
-.music-label{color:var(--cyan);font-size:9px;letter-spacing:3px}
-.music-info h3{margin:8px 0 15px;font-size:16px}
-.progress{height:4px;background:rgba(255,255,255,.12);border-radius:10px;cursor:pointer}
-.progress-bar{width:0%;height:100%;background:var(--cyan);border-radius:inherit}
-.controls{margin-top:14px;display:flex;align-items:center;gap:13px}
-.control{border:none;background:none;color:#fff;cursor:pointer;font-size:16px}
-.play-btn{
-    width:42px;height:42px;border-radius:50%;background:#fff;color:#064e73;
-    display:grid;place-items:center;font-size:13px;
-}
-
-/* TIMELINE */
-.timeline{position:relative;max-width:850px;margin:auto;z-index:10}
-.timeline::before{
-    content:"";position:absolute;left:50%;top:0;bottom:0;width:1px;
-    background:linear-gradient(transparent,var(--cyan),transparent);
-}
-.timeline-item{width:50%;padding:20px 45px;position:relative}
-.timeline-item:nth-child(even){margin-left:50%}
-.timeline-item:nth-child(odd){text-align:right}
-.timeline-dot{
-    position:absolute;top:30px;width:12px;height:12px;border-radius:50%;
-    background:var(--cyan);box-shadow:0 0 20px var(--cyan);
-}
-.timeline-item:nth-child(odd) .timeline-dot{right:-6px}
-.timeline-item:nth-child(even) .timeline-dot{left:-6px}
-.timeline-card{
-    padding:22px;border-radius:20px;background:rgba(255,255,255,.055);
-    border:1px solid var(--border);transition:.4s;
-}
-.timeline-card:hover{
-    transform:translateY(-5px);border-color:rgba(34,211,238,.35);
-}
-.timeline-card small{color:var(--cyan);font-size:9px;letter-spacing:2px}
-.timeline-card h3{margin:7px 0}
-.timeline-card p{color:#779ba8;font-size:11px;line-height:1.7}
-
-/* DEEP MEMORY */
-.deep-memory{
-    min-height:90vh;display:flex;justify-content:center;align-items:center;
-    text-align:center;
-    background:radial-gradient(circle at center,rgba(8,126,164,.14),transparent 40%),#010d18;
-}
-.deep-memory-content{position:relative;z-index:10}
-.deep-label{color:var(--cyan);font-size:9px;letter-spacing:5px;margin-bottom:20px}
-.deep-memory h2{
-    font-size:clamp(40px,7vw,85px);line-height:.95;letter-spacing:-4px;
-}
-.deep-memory p{
-    max-width:480px;margin:22px auto 0;color:#7293a0;
-    font-size:12px;line-height:1.8;
-}
-.bottle-wrap{margin-top:45px;display:flex;justify-content:center}
-.memory-bottle{
-    position:relative;width:110px;height:180px;cursor:pointer;
-    animation:bottleFloat 4s ease-in-out infinite;transition:transform .4s ease;
-}
-.memory-bottle:hover{transform:scale(1.08) rotate(3deg)}
-.bottle-neck{
-    position:absolute;top:0;left:40%;width:20%;height:35px;
-    border:2px solid rgba(186,247,255,.55);border-bottom:none;
-    border-radius:10px 10px 0 0;
-}
-.bottle-body{
-    position:absolute;bottom:0;left:8%;width:84%;height:150px;
-    border:2px solid rgba(186,247,255,.55);border-radius:28px 28px 35px 35px;
-    background:linear-gradient(135deg,rgba(255,255,255,.14),rgba(34,211,238,.04));
-    backdrop-filter:blur(4px);
-    box-shadow:inset 8px 0 15px rgba(255,255,255,.08),0 0 30px rgba(34,211,238,.12);
-}
-.bottle-cork{
-    position:absolute;top:-5px;left:40%;width:20%;height:10px;
-    border-radius:5px;background:#9b7653;
-}
-.bottle-paper{
-    position:absolute;left:24%;top:52px;width:52%;height:65px;
-    border-radius:4px;background:#d8f7f9;transform:rotate(-7deg);
-    box-shadow:0 4px 8px rgba(0,0,0,.2);
-}
-.bottle-paper::after{
-    content:"MEMORY";position:absolute;inset:0;
-    display:flex;justify-content:center;align-items:center;
-    color:#126178;font-size:7px;letter-spacing:2px;
-}
-@keyframes bottleFloat{
-    0%,100%{transform:translateY(0) rotate(-2deg)}
-    50%{transform:translateY(-18px) rotate(2deg)}
-}
-
-/* ENDING */
-.ending{
-    min-height:80vh;display:flex;align-items:center;justify-content:center;
-    text-align:center;
-    background:radial-gradient(ellipse at center bottom,#064e73,#021522 65%);
-}
-.ending-content{position:relative;z-index:5}
-.ending-symbol{font-size:55px;margin-bottom:25px;animation:floating 3s ease-in-out infinite}
-.ending h2{font-size:clamp(35px,6vw,70px);letter-spacing:-3px}
-.ending p{color:#83aab8;font-size:12px;margin-top:15px}
-
-/* FOOTER */
-footer{padding:40px 20px;text-align:center;background:#01101a}
-footer p{color:#527482;font-size:10px;letter-spacing:1px}
-
-/* MODAL */
-.modal{
-    position:fixed;inset:0;background:rgba(0,10,18,.92);
-    backdrop-filter:blur(20px);display:none;align-items:center;
-    justify-content:center;padding:25px;z-index:9999;
-}
-.modal.active{display:flex}
-.modal-content{
-    position:relative;width:min(900px,95vw);
-    display:flex;flex-direction:column;align-items:center;
-}
-.modal img{
-    max-width:90vw;max-height:75vh;object-fit:contain;border-radius:18px;
-    box-shadow:0 20px 70px rgba(0,0,0,.6);
-}
-.modal-number{margin-top:18px;color:var(--cyan);font-size:9px;letter-spacing:4px}
-.close{
-    position:absolute;top:20px;right:30px;
-    font-size:35px;color:#fff;cursor:pointer;z-index:5;
-}
-.modal-nav{display:flex;gap:15px;margin-top:15px}
-.modal-nav button{
-    width:42px;height:42px;border-radius:50%;
-    border:1px solid rgba(255,255,255,.2);
-    background:rgba(255,255,255,.08);color:#fff;cursor:pointer;
-    backdrop-filter:blur(10px);transition:.3s;
-}
-.modal-nav button:hover{
-    background:rgba(34,211,238,.2);border-color:var(--cyan);
-}
-
-/* REVEAL */
-.reveal{opacity:0;transform:translateY(35px);transition:opacity 1s ease,transform 1s ease}
-.reveal.show{opacity:1;transform:translateY(0)}
-
-@keyframes floating{
-    0%,100%{transform:translateY(0)}
-    50%{transform:translateY(-12px)}
-}
-
-/* CURSOR BUBBLES */
-.cursor-bubble{
-    position:fixed;width:var(--cursor-size);height:var(--cursor-size);
-    left:var(--cursor-x);top:var(--cursor-y);border-radius:50%;
-    border:1px solid rgba(255,255,255,.25);
-    pointer-events:none;z-index:9998;
-    animation:cursorBubble 1.8s ease-out forwards;
-}
-@keyframes cursorBubble{
-    0%{opacity:.65;transform:scale(.5)}
-    100%{opacity:0;transform:translateY(-70px) scale(1.4)}
-}
-
-/* TABLET */
-@media(max-width:850px){
-    .nav-links{
-        display:none;position:absolute;top:65px;left:0;right:0;
-        padding:20px;flex-direction:column;text-align:center;
-        background:rgba(2,21,34,.95);border-radius:20px;
+    0% {
+        transform:
+            translateX(-120px)
+            translateY(0);
     }
-    .nav-links.active{display:flex}
-    .menu-btn{display:block}
-    .video-grid{grid-template-columns:1fr}
-    .timeline::before{left:8px}
-    .timeline-item,.timeline-item:nth-child(even){
-        width:100%;margin-left:0;text-align:left;padding-left:35px;padding-right:0;
+
+    20% {
+        transform:
+            translateX(20vw)
+            translateY(-18px);
     }
-    .timeline-item:nth-child(odd) .timeline-dot,
-    .timeline-item:nth-child(even) .timeline-dot{
-        left:2px;right:auto;
+
+    40% {
+        transform:
+            translateX(45vw)
+            translateY(12px);
+    }
+
+    60% {
+        transform:
+            translateX(70vw)
+            translateY(-15px);
+    }
+
+    80% {
+        transform:
+            translateX(95vw)
+            translateY(10px);
+    }
+
+    100% {
+        transform:
+            translateX(125vw)
+            translateY(0);
     }
 }
 
-/* MOBILE */
-@media(max-width:550px){
-    section{padding:90px 5%}
-    .hero h1{letter-spacing:-3px}
-    .hero-description{font-size:11px}
-    .gallery{columns:2 130px}
-    .music-player{flex-direction:column;text-align:center}
-    .album{width:150px;height:150px}
-    .hourglass-area{transform:scale(.85)}
-    .stats{gap:8px}
-    .stat{min-width:105px}
-    .fish-container{opacity:.9}
-    .jelly-container{opacity:.55}
-    .cursor-bubble{display:none}
-    .deep-memory h2{letter-spacing:-2px}
+.fish.reverse {
+    animation-name: fishSwimReverse;
+}
 
-    /* ikan sedikit lebih kecil di HP */
-    .fish{
-        --fish-size:70px;
+@keyframes fishSwimReverse {
+
+    0% {
+        transform:
+            translateX(120vw)
+            translateY(0)
+            scaleX(-1);
     }
 
-    .modal img{max-height:65vh}
+    25% {
+        transform:
+            translateX(90vw)
+            translateY(15px)
+            scaleX(-1);
+    }
+
+    50% {
+        transform:
+            translateX(55vw)
+            translateY(-12px)
+            scaleX(-1);
+    }
+
+    75% {
+        transform:
+            translateX(25vw)
+            translateY(15px)
+            scaleX(-1);
+    }
+
+    100% {
+        transform:
+            translateX(-150px)
+            translateY(0)
+            scaleX(-1);
+    }
 }
+
+
+/* =====================================================
+   JELLYFISH
+===================================================== */
+
+.jelly-container {
+    position: fixed;
+    inset: 0;
+
+    pointer-events: none;
+
+    overflow: hidden;
+
+    z-index: 4;
+}
+
+.jelly {
+    position: absolute;
+
+    width: var(--jelly-size);
+    height: calc(var(--jelly-size) * .9);
+
+    left: var(--jelly-left);
+    top: var(--jelly-top);
+
+    opacity: .38;
+
+    animation:
+        jellyFloat var(--jelly-duration)
+        ease-in-out infinite;
+
+    animation-delay: var(--jelly-delay);
+
+    filter:
+        drop-shadow(
+            0 0 15px
+            var(--jelly-color)
+        );
+}
+
+.jelly-head {
+    position: absolute;
+
+    top: 0;
+    left: 10%;
+
+    width: 80%;
+    height: 55%;
+
+    border-radius:
+        50% 50% 35% 35%;
+
+    background:
+        linear-gradient(
+            135deg,
+            rgba(255,255,255,.35),
+            var(--jelly-color)
+        );
+}
+
+.jelly-head::after {
+    content: "";
+
+    position: absolute;
+
+    inset: 6px;
+
+    border-radius: inherit;
+
+    border:
+        1px solid
+        rgba(255,255,255,.35);
+}
+
+.jelly-tentacles {
+    position: absolute;
+
+    top: 45%;
+    left: 20%;
+
+    width: 60%;
+    height: 55%;
+}
+
+.jelly-tentacles span {
+    position: absolute;
+
+    top: 0;
+
+    width: 2px;
+    height: 100%;
+
+    border-radius: 20px;
+
+    background:
+        var(--jelly-color);
+
+    box-shadow:
+        0 0 7px
+        var(--jelly-color);
+}
+
+.jelly-tentacles span:nth-child(1) {
+    left: 10%;
+}
+
+.jelly-tentacles span:nth-child(2) {
+    left: 35%;
+}
+
+.jelly-tentacles span:nth-child(3) {
+    left: 60%;
+}
+
+.jelly-tentacles span:nth-child(4) {
+    left: 85%;
+}
+
+@keyframes jellyFloat {
+
+    0%,100% {
+        transform:
+            translateY(0)
+            translateX(0);
+    }
+
+    50% {
+        transform:
+            translateY(-45px)
+            translateX(25px);
+    }
+}
+
+
+/* =====================================================
+   STAR FIELD
+===================================================== */
+
+.stars {
+    position: fixed;
+    inset: 0;
+
+    pointer-events: none;
+
+    opacity: 0;
+
+    transition:
+        opacity 2s ease;
+
+    z-index: 2;
+}
+
+body.night-mode .stars {
+    opacity: 1;
+}
+
+.star {
+    position: absolute;
+
+    width: var(--star-size);
+    height: var(--star-size);
+
+    left: var(--star-left);
+    top: var(--star-top);
+
+    border-radius: 50%;
+
+    background: white;
+
+    box-shadow:
+        0 0 8px
+        rgba(255,255,255,.8);
+
+    animation:
+        twinkle var(--star-speed)
+        ease-in-out infinite;
+
+    animation-delay: var(--star-delay);
+}
+
+@keyframes twinkle {
+
+    0%,100% {
+        opacity: .25;
+    }
+
+    50% {
+        opacity: 1;
+    }
+}
+
+
+/* =====================================================
+   NAVBAR
+===================================================== */
+
+.navbar {
+    position: fixed;
+
+    top: 18px;
+    left: 50%;
+
+    transform: translateX(-50%);
+
+    width: min(94%, 1050px);
+
+    padding: 13px 18px;
+
+    display: flex;
+
+    align-items: center;
+    justify-content: space-between;
+
+    background:
+        rgba(2,21,34,.58);
+
+    border:
+        1px solid var(--border);
+
+    backdrop-filter:
+        blur(20px);
+
+    border-radius: 50px;
+
+    z-index: 1000;
+}
+
+.logo {
+    font-weight: 700;
+
+    font-size: 14px;
+
+    letter-spacing: .5px;
+}
+
+.logo span {
+    color: var(--cyan);
+}
+
+.nav-links {
+    list-style: none;
+
+    display: flex;
+
+    gap: 25px;
+}
+
+.nav-links a {
+    color: #d7f7fb;
+
+    font-size: 11px;
+
+    transition: .3s;
+}
+
+.nav-links a:hover {
+    color: var(--cyan);
+}
+
+.menu-btn {
+    display: none;
+
+    background: none;
+    border: none;
+
+    color: white;
+
+    font-size: 22px;
+
+    cursor: pointer;
+}
+
+
+/* =====================================================
+   HERO
+===================================================== */
+
+.hero {
+    min-height: 100vh;
+
+    position: relative;
+
+    display: flex;
+
+    justify-content: center;
+    align-items: center;
+
+    text-align: center;
+
+    overflow: hidden;
+
+    background:
+
+        radial-gradient(
+            circle at 50% 25%,
+            rgba(34,211,238,.15),
+            transparent 30%
+        ),
+
+        linear-gradient(
+            180deg,
+            #021522,
+            #043b59 60%,
+            #03243a
+        );
+
+    transition:
+        background 2s ease;
+}
+
+body.deep-mode .hero {
+    background:
+        radial-gradient(
+            circle at 50% 25%,
+            rgba(8,126,164,.10),
+            transparent 30%
+        ),
+        linear-gradient(
+            180deg,
+            #010c18,
+            #02263a 65%,
+            #011522
+        );
+}
+
+body.night-mode .hero {
+    background:
+        radial-gradient(
+            circle at 50% 25%,
+            rgba(91,92,180,.12),
+            transparent 30%
+        ),
+        linear-gradient(
+            180deg,
+            #020611,
+            #071326 65%,
+            #020711
+        );
+}
+
+.hero-content {
+    position: relative;
+
+    z-index: 10;
+
+    width: min(850px, 90%);
+
+    padding-top: 30px;
+}
+
+.hero-small {
+    color: var(--light);
+
+    font-size: 10px;
+
+    letter-spacing: 5px;
+
+    margin-bottom: 22px;
+}
+
+.hero h1 {
+    font-size:
+        clamp(48px, 9vw, 105px);
+
+    line-height: .9;
+
+    letter-spacing: -5px;
+
+    font-weight: 800;
+}
+
+.hero h1 span {
+    display: block;
+
+    color: transparent;
+
+    -webkit-text-stroke:
+        1px rgba(255,255,255,.75);
+}
+
+.hero-description {
+    max-width: 570px;
+
+    margin: 28px auto;
+
+    color: #b9dce5;
+
+    line-height: 1.8;
+
+    font-size: 13px;
+}
+
+.explore-btn {
+    display: inline-flex;
+
+    padding: 14px 25px;
+
+    border-radius: 50px;
+
+    background: white;
+
+    color: #04334b;
+
+    font-size: 12px;
+
+    font-weight: 700;
+
+    transition: .3s;
+}
+
+.explore-btn:hover {
+    transform:
+        translateY(-5px);
+
+    box-shadow:
+        0 15px 45px
+        rgba(34,211,238,.25);
+}
+
+.hero-light {
+    position: absolute;
+
+    width: 500px;
+    height: 500px;
+
+    left: 50%;
+    top: 15%;
+
+    transform:
+        translateX(-50%);
+
+    background:
+        radial-gradient(
+            circle,
+            rgba(34,211,238,.07),
+            transparent 65%
+        );
+
+    pointer-events: none;
+}
+
+
+/* =====================================================
+   WAVES
+===================================================== */
+
+.wave {
+    position: absolute;
+
+    bottom: -3px;
+    left: -5%;
+
+    width: 110%;
+    height: 120px;
+
+    background:
+        url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1440 320'%3E%3Cpath fill='%23021522' d='M0,160 C180,80 300,240 480,160 C650,80 800,230 960,160 C1110,90 1260,220 1440,130 L1440,320 L0,320 Z'/%3E%3C/svg%3E")
+        center/cover;
+
+    animation:
+        waveAnimation 12s linear infinite;
+}
+
+@keyframes waveAnimation {
+
+    0% {
+        transform:
+            translateX(0);
+    }
+
+    50% {
+        transform:
+            translateX(-3%);
+    }
+
+    100% {
+        transform:
+            translateX(0);
+    }
+}
+
+
+/* =====================================================
+   DIVE INDICATOR
+===================================================== */
+
+.dive-indicator {
+    position: absolute;
+
+    bottom: 45px;
+    left: 50%;
+
+    transform:
+        translateX(-50%);
+
+    display: flex;
+
+    flex-direction: column;
+
+    align-items: center;
+
+    gap: 7px;
+
+    color: rgba(255,255,255,.6);
+
+    font-size: 8px;
+
+    letter-spacing: 3px;
+
+    z-index: 10;
+
+    animation:
+        divePulse 2s ease-in-out infinite;
+}
+
+.dive-arrow {
+    font-size: 18px;
+}
+
+@keyframes divePulse {
+
+    0%,100% {
+        opacity: .45;
+        transform:
+            translateX(-50%)
+            translateY(0);
+    }
+
+    50% {
+        opacity: 1;
+        transform:
+            translateX(-50%)
+            translateY(7px);
+    }
+}
+
+
+/* =====================================================
+   SECTIONS
+===================================================== */
+
+section {
+    position: relative;
+
+    padding:
+        120px 7%;
+
+    background: var(--deep);
+
+    overflow: hidden;
+
+    transition:
+        background 2s ease;
+}
+
+body.deep-mode section {
+    background:
+        #011522;
+}
+
+body.night-mode section {
+    background:
+        #020914;
+}
+
+.section-header {
+    text-align: center;
+
+    max-width: 700px;
+
+    margin:
+        0 auto 60px;
+
+    position: relative;
+
+    z-index: 10;
+}
+
+.section-label {
+    color: var(--cyan);
+
+    font-size: 10px;
+
+    letter-spacing: 4px;
+
+    text-transform: uppercase;
+}
+
+.section-header h2 {
+    margin-top: 10px;
+
+    font-size:
+        clamp(32px, 5vw, 60px);
+
+    letter-spacing: -2px;
+}
+
+.section-header p {
+    color: #739baa;
+
+    font-size: 13px;
+
+    line-height: 1.7;
+
+    margin-top: 12px;
+}
+
+
+/* =====================================================
+   HOURGLASS SECTION
+===================================================== */
+
+.time-section {
+
+    background:
+
+        radial-gradient(
+            circle at center,
+            rgba(8,126,164,.15),
+            transparent 45%
+        ),
+
+        #021522;
+
+    min-height: 850px;
+
+    display: flex;
+
+    flex-direction: column;
+
+    justify-content: center;
+
+    align-items: center;
+}
+
+.hourglass-area {
+    position: relative;
+
+    width: 330px;
+    height: 500px;
+
+    display: flex;
+
+    justify-content: center;
+
+    transition:
+        transform 1s ease;
+}
+
+.hourglass-area.flip {
+    transform:
+        rotate(180deg);
+}
+
+.hourglass-glow {
+    position: absolute;
+
+    width: 280px;
+    height: 280px;
+
+    top: 100px;
+
+    background:
+        radial-gradient(
+            circle,
+            rgba(34,211,238,.12),
+            transparent 65%
+        );
+
+    filter: blur(15px);
+}
+
+
+/* =====================================================
+   HOURGLASS
+===================================================== */
+
+.hourglass {
+
+    position: relative;
+
+    width: 190px;
+    height: 390px;
+
+    filter:
+        drop-shadow(
+            0 0 30px
+            rgba(34,211,238,.12)
+        );
+}
+
+.glass-top,
+.glass-bottom {
+
+    position: absolute;
+
+    left: 50%;
+
+    transform:
+        translateX(-50%);
+
+    width: 170px;
+    height: 22px;
+
+    border-radius: 12px;
+
+    background:
+        linear-gradient(
+            90deg,
+            #6ee7f7,
+            #0b6f91,
+            #6ee7f7
+        );
+
+    box-shadow:
+        0 0 15px
+        rgba(34,211,238,.25);
+}
+
+.glass-top {
+    top: 0;
+}
+
+.glass-bottom {
+    bottom: 0;
+}
+
+.glass-body {
+
+    position: absolute;
+
+    top: 18px;
+    bottom: 18px;
+
+    left: 50%;
+
+    transform:
+        translateX(-50%);
+
+    width: 150px;
+
+    overflow: hidden;
+
+    clip-path:
+        polygon(
+            0 0,
+            100% 0,
+            72% 50%,
+            100% 100%,
+            0 100%,
+            28% 50%
+        );
+
+    background:
+        linear-gradient(
+            90deg,
+            rgba(255,255,255,.03),
+            rgba(255,255,255,.12),
+            rgba(255,255,255,.03)
+        );
+
+    border-left:
+        1px solid rgba(255,255,255,.18);
+
+    border-right:
+        1px solid rgba(255,255,255,.18);
+}
+
+.sand-top {
+
+    position: absolute;
+
+    top: 18px;
+
+    left: 50%;
+
+    transform:
+        translateX(-50%);
+
+    width: 85px;
+    height: 115px;
+
+    background:
+        linear-gradient(
+            180deg,
+            #67e8f9,
+            #0ea5c6
+        );
+
+    clip-path:
+        polygon(
+            0 0,
+            100% 0,
+            67% 100%,
+            33% 100%
+        );
+
+    opacity: .9;
+
+    filter:
+        drop-shadow(
+            0 0 8px
+            rgba(34,211,238,.35)
+        );
+
+    animation:
+        sandTop 10s linear infinite;
+}
+
+@keyframes sandTop {
+
+    0% {
+        height: 115px;
+    }
+
+    90% {
+        height: 8px;
+    }
+
+    100% {
+        height: 8px;
+    }
+}
+
+.sand-stream {
+
+    position: absolute;
+
+    top: 80px;
+
+    left: 50%;
+
+    transform:
+        translateX(-50%);
+
+    width: 4px;
+    height: 150px;
+
+    background:
+        linear-gradient(
+            to bottom,
+            #67e8f9,
+            #0891b2
+        );
+
+    border-radius: 20px;
+
+    box-shadow:
+        0 0 10px
+        rgba(34,211,238,.5);
+
+    animation:
+        stream 2s linear infinite;
+}
+
+@keyframes stream {
+
+    0% {
+        height: 10px;
+        opacity: .2;
+    }
+
+    50% {
+        height: 150px;
+        opacity: 1;
+    }
+
+    100% {
+        height: 150px;
+        opacity: .2;
+    }
+}
+
+.sand-bottom {
+
+    position: absolute;
+
+    bottom: 22px;
+
+    left: 50%;
+
+    transform:
+        translateX(-50%);
+
+    width: 110px;
+    height: 75px;
+
+    background:
+        linear-gradient(
+            180deg,
+            #0891b2,
+            #0e7490
+        );
+
+    clip-path:
+        polygon(
+            15% 100%,
+            85% 100%,
+            60% 0,
+            40% 0
+        );
+
+    animation:
+        sandBottom 10s linear infinite;
+
+    filter:
+        drop-shadow(
+            0 0 10px
+            rgba(34,211,238,.3)
+        );
+}
+
+@keyframes sandBottom {
+
+    0% {
+        height: 8px;
+    }
+
+    90% {
+        height: 75px;
+    }
+
+    100% {
+        height: 75px;
+    }
+}
+
+
+/* =====================================================
+   TIME INFO
+===================================================== */
+
+.time-info {
+    margin-top: -10px;
+
+    text-align: center;
+
+    position: relative;
+
+    z-index: 10;
+}
+
+.time-info h3 {
+    font-size: 17px;
+
+    letter-spacing: 3px;
+
+    text-transform: uppercase;
+}
+
+.time-info p {
+    color: #739baa;
+
+    font-size: 11px;
+
+    margin-top: 8px;
+}
+
+
+/* =====================================================
+   STATS
+===================================================== */
+
+.stats {
+
+    display: flex;
+
+    gap: 18px;
+
+    margin-top: 25px;
+
+    flex-wrap: wrap;
+
+    justify-content: center;
+}
+
+.stat {
+
+    min-width: 125px;
+
+    padding: 17px 22px;
+
+    text-align: center;
+
+    border-radius: 18px;
+
+    background:
+        rgba(255,255,255,.055);
+
+    border:
+        1px solid var(--border);
+
+    backdrop-filter:
+        blur(15px);
+}
+
+.stat strong {
+
+    display: block;
+
+    font-size: 25px;
+
+    color: var(--light);
+}
+
+.stat span {
+
+    color: #7297a4;
+
+    font-size: 9px;
+
+    letter-spacing: 1px;
+}
+
+
+/* =====================================================
+   PHOTO GALLERY
+===================================================== */
+
+.gallery {
+
+    max-width: 1200px;
+
+    margin: auto;
+
+    columns: 4 220px;
+
+    column-gap: 16px;
+
+    position: relative;
+
+    z-index: 10;
+}
+
+.photo {
+
+    position: relative;
+
+    break-inside: avoid;
+
+    margin-bottom: 16px;
+
+    border-radius: 20px;
+
+    overflow: hidden;
+
+    cursor: pointer;
+
+    border:
+        1px solid rgba(255,255,255,.08);
+
+    background: #062b40;
+
+    transition:
+        transform .5s ease;
+}
+
+.photo:hover {
+    transform:
+        translateY(-5px);
+}
+
+.photo img {
+
+    width: 100%;
+
+    transition:
+        transform .6s ease,
+        filter .5s ease;
+}
+
+.photo:hover img {
+
+    transform:
+        scale(1.07);
+
+    filter:
+        brightness(.72);
+}
+
+.photo-overlay {
+
+    position: absolute;
+
+    inset: 0;
+
+    display: flex;
+
+    align-items: flex-end;
+
+    padding: 20px;
+
+    background:
+        linear-gradient(
+            transparent,
+            rgba(0,0,0,.8)
+        );
+
+    opacity: 0;
+
+    transition: .4s;
+}
+
+.photo:hover .photo-overlay {
+    opacity: 1;
+}
+
+
+/* =====================================================
+   VIDEO
+===================================================== */
+
+.video-grid {
+
+    max-width: 1150px;
+
+    margin: auto;
+
+    display: grid;
+
+    grid-template-columns:
+        repeat(3,1fr);
+
+    gap: 20px;
+
+    position: relative;
+
+    z-index: 10;
+}
+
+.video-card {
+
+    overflow: hidden;
+
+    border-radius: 22px;
+
+    background:
+        rgba(255,255,255,.055);
+
+    border:
+        1px solid var(--border);
+
+    transition: .4s;
+}
+
+.video-card:hover {
+
+    transform:
+        translateY(-8px);
+
+    border-color:
+        rgba(34,211,238,.35);
+}
+
+.video-card video {
+
+    width: 100%;
+
+    display: block;
+
+    aspect-ratio: 16/10;
+
+    object-fit: cover;
+
+    background: #000;
+}
+
+.video-info {
+    padding: 18px;
+}
+
+.video-info h3 {
+    font-size: 14px;
+}
+
+.video-info p {
+
+    color: #7297a4;
+
+    margin-top: 6px;
+
+    font-size: 10px;
+}
+
+
+/* =====================================================
+   MUSIC
+===================================================== */
+
+.music-section {
+
+    background:
+
+        radial-gradient(
+            circle at center,
+            rgba(8,126,164,.18),
+            transparent 45%
+        ),
+
+        #021522;
+}
+
+.music-player {
+
+    width: min(700px, 95%);
+
+    margin: auto;
+
+    padding: 25px;
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 22px;
+
+    border-radius: 28px;
+
+    background:
+        rgba(255,255,255,.06);
+
+    border:
+        1px solid var(--border);
+
+    backdrop-filter:
+        blur(20px);
+
+    position: relative;
+
+    z-index: 10;
+}
+
+.album {
+
+    width: 110px;
+    height: 110px;
+
+    flex-shrink: 0;
+
+    overflow: hidden;
+
+    border-radius: 20px;
+}
+
+.album img {
+
+    width: 100%;
+    height: 100%;
+
+    object-fit: cover;
+}
+
+.music-info {
+    flex: 1;
+}
+
+.music-label {
+
+    color: var(--cyan);
+
+    font-size: 9px;
+
+    letter-spacing: 3px;
+}
+
+.music-info h3 {
+
+    margin: 8px 0 15px;
+
+    font-size: 16px;
+}
+
+.progress {
+
+    height: 4px;
+
+    background:
+        rgba(255,255,255,.12);
+
+    border-radius: 10px;
+
+    cursor: pointer;
+}
+
+.progress-bar {
+
+    width: 0%;
+
+    height: 100%;
+
+    background:
+        var(--cyan);
+
+    border-radius: inherit;
+}
+
+.controls {
+
+    margin-top: 14px;
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 13px;
+}
+
+.control {
+
+    border: none;
+
+    background: none;
+
+    color: white;
+
+    cursor: pointer;
+
+    font-size: 16px;
+}
+
+.play-btn {
+
+    width: 42px;
+    height: 42px;
+
+    border-radius: 50%;
+
+    background: white;
+
+    color: #064e73;
+
+    display: grid;
+
+    place-items: center;
+
+    font-size: 13px;
+}
+
+
+/* =====================================================
+   TIMELINE
+===================================================== */
+
+.timeline {
+
+    position: relative;
+
+    max-width: 850px;
+
+    margin: auto;
+
+    z-index: 10;
+}
+
+.timeline::before {
+
+    content: "";
+
+    position: absolute;
+
+    left: 50%;
+
+    top: 0;
+    bottom: 0;
+
+    width: 1px;
+
+    background:
+        linear-gradient(
+            transparent,
+            var(--cyan),
+            transparent
+        );
+}
+
+.timeline-item {
+
+    width: 50%;
+
+    padding: 20px 45px;
+
+    position: relative;
+}
+
+.timeline-item:nth-child(even) {
+    margin-left: 50%;
+}
+
+.timeline-item:nth-child(odd) {
+    text-align: right;
+}
+
+.timeline-dot {
+
+    position: absolute;
+
+    top: 30px;
+
+    width: 12px;
+    height: 12px;
+
+    border-radius: 50%;
+
+    background: var(--cyan);
+
+    box-shadow:
+        0 0 20px
+        var(--cyan);
+}
+
+.timeline-item:nth-child(odd)
+.timeline-dot {
+    right: -6px;
+}
+
+.timeline-item:nth-child(even)
+.timeline-dot {
+    left: -6px;
+}
+
+.timeline-card {
+
+    padding: 22px;
+
+    border-radius: 20px;
+
+    background:
+        rgba(255,255,255,.055);
+
+    border:
+        1px solid var(--border);
+
+    transition: .4s;
+}
+
+.timeline-card:hover {
+
+    transform:
+        translateY(-5px);
+
+    border-color:
+        rgba(34,211,238,.35);
+}
+
+.timeline-card small {
+
+    color: var(--cyan);
+
+    font-size: 9px;
+
+    letter-spacing: 2px;
+}
+
+.timeline-card h3 {
+    margin:
+        7px 0;
+}
+
+.timeline-card p {
+
+    color: #779ba8;
+
+    font-size: 11px;
+
+    line-height: 1.7;
+}
+
+
+/* =====================================================
+   DEEP MEMORY SECTION
+===================================================== */
+
+.deep-memory {
+
+    min-height: 90vh;
+
+    display: flex;
+
+    justify-content: center;
+
+    align-items: center;
+
+    text-align: center;
+
+    background:
+        radial-gradient(
+            circle at center,
+            rgba(8,126,164,.14),
+            transparent 40%
+        ),
+        #010d18;
+}
+
+.deep-memory-content {
+    position: relative;
+    z-index: 10;
+}
+
+.deep-label {
+
+    color: var(--cyan);
+
+    font-size: 9px;
+
+    letter-spacing: 5px;
+
+    margin-bottom: 20px;
+}
+
+.deep-memory h2 {
+
+    font-size:
+        clamp(40px, 7vw, 85px);
+
+    line-height: .95;
+
+    letter-spacing: -4px;
+}
+
+.deep-memory p {
+
+    max-width: 480px;
+
+    margin: 22px auto 0;
+
+    color: #7293a0;
+
+    font-size: 12px;
+
+    line-height: 1.8;
+}
+
+
+/* =====================================================
+   MEMORY BOTTLE
+===================================================== */
+
+.bottle-wrap {
+
+    margin-top: 45px;
+
+    display: flex;
+
+    justify-content: center;
+}
+
+.memory-bottle {
+
+    position: relative;
+
+    width: 110px;
+    height: 180px;
+
+    cursor: pointer;
+
+    animation:
+        bottleFloat 4s ease-in-out infinite;
+
+    transition:
+        transform .4s ease;
+}
+
+.memory-bottle:hover {
+    transform:
+        scale(1.08)
+        rotate(3deg);
+}
+
+.bottle-neck {
+
+    position: absolute;
+
+    top: 0;
+    left: 40%;
+
+    width: 20%;
+    height: 35px;
+
+    border:
+        2px solid
+        rgba(186,247,255,.55);
+
+    border-bottom: none;
+
+    border-radius:
+        10px 10px 0 0;
+}
+
+.bottle-body {
+
+    position: absolute;
+
+    bottom: 0;
+    left: 8%;
+
+    width: 84%;
+    height: 150px;
+
+    border:
+        2px solid
+        rgba(186,247,255,.55);
+
+    border-radius:
+        28px 28px 35px 35px;
+
+    background:
+        linear-gradient(
+            135deg,
+            rgba(255,255,255,.14),
+            rgba(34,211,238,.04)
+        );
+
+    backdrop-filter:
+        blur(4px);
+
+    box-shadow:
+        inset 8px 0 15px
+        rgba(255,255,255,.08),
+
+        0 0 30px
+        rgba(34,211,238,.12);
+}
+
+.bottle-cork {
+
+    position: absolute;
+
+    top: -5px;
+    left: 40%;
+
+    width: 20%;
+    height: 10px;
+
+    border-radius: 5px;
+
+    background:
+        #9b7653;
+}
+
+.bottle-paper {
+
+    position: absolute;
+
+    left: 24%;
+    top: 52px;
+
+    width: 52%;
+    height: 65px;
+
+    border-radius: 4px;
+
+    background:
+        #d8f7f9;
+
+    transform:
+        rotate(-7deg);
+
+    box-shadow:
+        0 4px 8px
+        rgba(0,0,0,.2);
+}
+
+.bottle-paper::after {
+
+    content:
+        "MEMORY";
+
+    position: absolute;
+
+    inset: 0;
+
+    display: flex;
+
+    justify-content: center;
+    align-items: center;
+
+    color:
+        #126178;
+
+    font-size: 7px;
+
+    letter-spacing: 2px;
+}
+
+@keyframes bottleFloat {
+
+    0%,100% {
+        transform:
+            translateY(0)
+            rotate(-2deg);
+    }
+
+    50% {
+        transform:
+            translateY(-18px)
+            rotate(2deg);
+    }
+}
+
+
+/* =====================================================
+   ENDING
+===================================================== */
+
+.ending {
+
+    min-height: 80vh;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    text-align: center;
+
+    background:
+
+        radial-gradient(
+            ellipse at center bottom,
+            #064e73,
+            #021522 65%
+        );
+}
+
+.ending-content {
+
+    position: relative;
+
+    z-index: 5;
+}
+
+.ending-symbol {
+
+    font-size: 55px;
+
+    margin-bottom: 25px;
+
+    animation:
+        floating 3s ease-in-out infinite;
+}
+
+.ending h2 {
+
+    font-size:
+        clamp(35px,6vw,70px);
+
+    letter-spacing: -3px;
+}
+
+.ending p {
+
+    color: #83aab8;
+
+    font-size: 12px;
+
+    margin-top: 15px;
+}
+
+
+/* =====================================================
+   FOOTER
+===================================================== */
+
+footer {
+
+    padding: 40px 20px;
+
+    text-align: center;
+
+    background: #01101a;
+}
+
+footer p {
+
+    color: #527482;
+
+    font-size: 10px;
+
+    letter-spacing: 1px;
+}
+
+
+/* =====================================================
+   PHOTO MODAL
+===================================================== */
+
+.modal {
+
+    position: fixed;
+
+    inset: 0;
+
+    background:
+        rgba(0,10,18,.92);
+
+    backdrop-filter:
+        blur(20px);
+
+    display: none;
+
+    align-items: center;
+
+    justify-content: center;
+
+    padding: 25px;
+
+    z-index: 9999;
+}
+
+.modal.active {
+    display: flex;
+}
+
+.modal-content {
+
+    position: relative;
+
+    width: min(900px, 95vw);
+
+    display: flex;
+
+    flex-direction: column;
+
+    align-items: center;
+}
+
+.modal img {
+
+    max-width: 90vw;
+
+    max-height: 75vh;
+
+    object-fit: contain;
+
+    border-radius: 18px;
+
+    box-shadow:
+        0 20px 70px
+        rgba(0,0,0,.6);
+}
+
+.modal-number {
+
+    margin-top: 18px;
+
+    color: var(--cyan);
+
+    font-size: 9px;
+
+    letter-spacing: 4px;
+}
+
+.close {
+
+    position: absolute;
+
+    top: 20px;
+    right: 30px;
+
+    font-size: 35px;
+
+    color: white;
+
+    cursor: pointer;
+
+    z-index: 5;
+}
+
+.modal-nav {
+
+    display: flex;
+
+    gap: 15px;
+
+    margin-top: 15px;
+}
+
+.modal-nav button {
+
+    width: 42px;
+    height: 42px;
+
+    border-radius: 50%;
+
+    border:
+        1px solid
+        rgba(255,255,255,.2);
+
+    background:
+        rgba(255,255,255,.08);
+
+    color: white;
+
+    cursor: pointer;
+
+    backdrop-filter:
+        blur(10px);
+
+    transition: .3s;
+}
+
+.modal-nav button:hover {
+
+    background:
+        rgba(34,211,238,.2);
+
+    border-color:
+        var(--cyan);
+}
+
+
+/* =====================================================
+   REVEAL
+===================================================== */
+
+.reveal {
+
+    opacity: 0;
+
+    transform:
+        translateY(35px);
+
+    transition:
+        opacity 1s ease,
+        transform 1s ease;
+}
+
+.reveal.show {
+
+    opacity: 1;
+
+    transform:
+        translateY(0);
+}
+
+
+/* =====================================================
+   FLOAT
+===================================================== */
+
+@keyframes floating {
+
+    0%,100% {
+        transform:
+            translateY(0);
+    }
+
+    50% {
+        transform:
+            translateY(-12px);
+    }
+}
+
+
+/* =====================================================
+   TABLET
+===================================================== */
+
+@media(max-width:850px) {
+
+    .nav-links {
+
+        display: none;
+
+        position: absolute;
+
+        top: 65px;
+
+        left: 0;
+        right: 0;
+
+        padding: 20px;
+
+        flex-direction: column;
+
+        text-align: center;
+
+        background:
+            rgba(2,21,34,.95);
+
+        border-radius: 20px;
+    }
+
+    .nav-links.active {
+        display: flex;
+    }
+
+    .menu-btn {
+        display: block;
+    }
+
+    .video-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .timeline::before {
+        left: 8px;
+    }
+
+    .timeline-item,
+    .timeline-item:nth-child(even) {
+
+        width: 100%;
+
+        margin-left: 0;
+
+        text-align: left;
+
+        padding-left: 35px;
+
+        padding-right: 0;
+    }
+
+    .timeline-item:nth-child(odd)
+    .timeline-dot,
+    .timeline-item:nth-child(even)
+    .timeline-dot {
+
+        left: 2px;
+
+        right: auto;
+    }
+}
+
+
+/* =====================================================
+   MOBILE
+===================================================== */
+
+@media(max-width:550px) {
+
+    section {
+        padding:
+            90px 5%;
+    }
+
+    .hero h1 {
+        letter-spacing: -3px;
+    }
+
+    .hero-description {
+        font-size: 11px;
+    }
+
+    .gallery {
+        columns: 2 130px;
+    }
+
+    .music-player {
+
+        flex-direction: column;
+
+        text-align: center;
+    }
+
+    .album {
+
+        width: 150px;
+        height: 150px;
+    }
+
+    .hourglass-area {
+
+        transform:
+            scale(.85);
+    }
+
+    .stats {
+        gap: 8px;
+    }
+
+    .stat {
+        min-width: 105px;
+    }
+
+    .fish-container {
+        opacity: .72;
+    }
+
+    .jelly-container {
+        opacity: .55;
+    }
+
+    .cursor-bubble {
+        display: none;
+    }
+
+    .deep-memory h2 {
+        letter-spacing: -2px;
+    }
+
+    .modal img {
+        max-height: 65vh;
+    }
+}
+
 </style>
 </head>
 
+
 <body>
 
-<!-- LOADER -->
+
+<!-- =====================================================
+     LOADER
+===================================================== -->
+
 <div class="loader" id="loader">
+
     <div class="loader-content">
-        <div class="loader-ocean">🌊</div>
-        <div class="loader-text">ENTERING OUR OCEAN</div>
+
+        <div class="loader-ocean">
+            🌊
+        </div>
+
+        <div class="loader-text">
+            ENTERING OUR OCEAN
+        </div>
+
     </div>
+
 </div>
 
+
+<!-- =====================================================
+     OCEAN LIGHT
+===================================================== -->
+
 <div class="ocean-light"></div>
+
+
+<!-- =====================================================
+     STARS
+===================================================== -->
+
 <div class="stars" id="stars"></div>
+
+
+<!-- =====================================================
+     BUBBLES
+===================================================== -->
+
 <div class="bubbles" id="bubbles"></div>
 
-<!-- INTERACTIVE FISH -->
-<div class="fish-container" id="fishContainer"></div>
 
-<!-- JELLYFISH -->
-<div class="jelly-container" id="jellyContainer"></div>
+<!-- =====================================================
+     FISH
+===================================================== -->
 
-<!-- NAVBAR -->
+<div
+    class="fish-container"
+    id="fishContainer">
+</div>
+
+
+<!-- =====================================================
+     JELLYFISH
+===================================================== -->
+
+<div
+    class="jelly-container"
+    id="jellyContainer">
+</div>
+
+
+<!-- =====================================================
+     NAVBAR
+===================================================== -->
+
 <nav class="navbar">
-    <div class="logo">Our<span>Ocean</span></div>
 
-    <ul class="nav-links" id="navLinks">
-        <li><a href="#time">Time</a></li>
-        <li><a href="#photos">Photos</a></li>
-        <li><a href="#videos">Videos</a></li>
-        <li><a href="#music">Music</a></li>
-        <li><a href="#timeline">Timeline</a></li>
+    <div class="logo">
+        Our<span>Ocean</span>
+    </div>
+
+    <ul
+        class="nav-links"
+        id="navLinks">
+
+        <li>
+            <a href="#time">
+                Time
+            </a>
+        </li>
+
+        <li>
+            <a href="#photos">
+                Photos
+            </a>
+        </li>
+
+        <li>
+            <a href="#videos">
+                Videos
+            </a>
+        </li>
+
+        <li>
+            <a href="#music">
+                Music
+            </a>
+        </li>
+
+        <li>
+            <a href="#timeline">
+                Timeline
+            </a>
+        </li>
+
     </ul>
 
-    <button class="menu-btn" id="menuBtn">☰</button>
+    <button
+        class="menu-btn"
+        id="menuBtn">
+
+        ☰
+
+    </button>
+
 </nav>
 
-<!-- HERO -->
+
+<!-- =====================================================
+     HERO
+===================================================== -->
+
 <header class="hero">
+
     <div class="hero-light"></div>
 
     <div class="hero-content">
-        <div class="hero-small">OUR MEMORY ARCHIVE</div>
+
+        <div class="hero-small">
+            OUR MEMORY ARCHIVE
+        </div>
 
         <h1>
             Our Ocean
-            <span>of Memories</span>
+            <span>
+                of Memories
+            </span>
         </h1>
 
         <p class="hero-description">
+
             Sebuah ruang kecil untuk menyimpan
             foto, video, lagu, dan momen-momen
             yang pernah kita lewati.
+
         </p>
 
-        <a href="#time" class="explore-btn">
+        <a
+            href="#time"
+            class="explore-btn">
+
             Dive Into Memories ↓
+
         </a>
+
     </div>
 
     <div class="dive-indicator">
-        <span>SCROLL TO DIVE</span>
-        <div class="dive-arrow">↓</div>
+
+        <span>
+            SCROLL TO DIVE
+        </span>
+
+        <div class="dive-arrow">
+            ↓
+        </div>
+
     </div>
 
     <div class="wave"></div>
+
 </header>
 
-<!-- TIME -->
-<section class="time-section" id="time">
+
+<!-- =====================================================
+     TIME
+===================================================== -->
+
+<section
+    class="time-section"
+    id="time">
 
     <div class="section-header reveal">
-        <div class="section-label">01 — TIME</div>
-        <h2>Time Keeps Moving</h2>
+
+        <div class="section-label">
+            01 — TIME
+        </div>
+
+        <h2>
+            Time Keeps Moving
+        </h2>
+
         <p>
             Waktu terus berjalan,
-            tetapi momen-momen ini tetap tersimpan.
+            tetapi momen-momen ini
+            tetap tersimpan.
         </p>
+
     </div>
 
-    <div class="hourglass-area" id="hourglassArea">
+
+    <div
+        class="hourglass-area"
+        id="hourglassArea">
+
         <div class="hourglass-glow"></div>
 
         <div class="hourglass">
+
             <div class="glass-top"></div>
 
             <div class="glass-body">
+
                 <div class="sand-top"></div>
+
                 <div class="sand-stream"></div>
+
                 <div class="sand-bottom"></div>
+
             </div>
 
             <div class="glass-bottom"></div>
+
         </div>
+
     </div>
+
 
     <div class="time-info reveal">
-        <h3>OUR TIME</h3>
-        <p>Every second becomes a memory.</p>
+
+        <h3>
+            OUR TIME
+        </h3>
+
+        <p>
+            Every second becomes a memory.
+        </p>
+
 
         <div class="stats">
+
             <div class="stat">
-                <strong id="photoCount">08</strong>
-                <span>PHOTOS</span>
+
+                <strong id="photoCount">
+                    08
+                </strong>
+
+                <span>
+                    PHOTOS
+                </span>
+
             </div>
 
             <div class="stat">
-                <strong id="videoCount">03</strong>
-                <span>VIDEOS</span>
+
+                <strong id="videoCount">
+                    03
+                </strong>
+
+                <span>
+                    VIDEOS
+                </span>
+
             </div>
 
             <div class="stat">
-                <strong>∞</strong>
-                <span>MEMORIES</span>
+
+                <strong>
+                    ∞
+                </strong>
+
+                <span>
+                    MEMORIES
+                </span>
+
             </div>
+
         </div>
+
     </div>
+
 </section>
 
-<!-- PHOTOS -->
+
+<!-- =====================================================
+     PHOTOS
+===================================================== -->
+
 <section id="photos">
 
     <div class="section-header reveal">
-        <div class="section-label">02 — PHOTO ARCHIVE</div>
-        <h2>Little Pieces</h2>
+
+        <div class="section-label">
+            02 — PHOTO ARCHIVE
+        </div>
+
+        <h2>
+            Little Pieces
+        </h2>
+
         <p>
             Foto-foto yang menyimpan
             bagian kecil dari perjalanan.
         </p>
+
     </div>
+
 
     <div class="gallery">
 
-        <div class="photo reveal">
-            <img src="assets/photo1.jpg" alt="Memory 1">
-            <div class="photo-overlay">Memory 01</div>
-        </div>
 
         <div class="photo reveal">
-            <img src="assets/photo2.jpg" alt="Memory 2">
-            <div class="photo-overlay">Memory 02</div>
+            <img
+                src="assets/photo1.jpg"
+                alt="Memory 1">
+
+            <div class="photo-overlay">
+                Memory 01
+            </div>
         </div>
 
-        <div class="photo reveal">
-            <img src="assets/photo3.jpg" alt="Memory 3">
-            <div class="photo-overlay">Memory 03</div>
-        </div>
 
         <div class="photo reveal">
-            <img src="assets/photo4.jpg" alt="Memory 4">
-            <div class="photo-overlay">Memory 04</div>
+            <img
+                src="assets/photo2.jpg"
+                alt="Memory 2">
+
+            <div class="photo-overlay">
+                Memory 02
+            </div>
         </div>
 
-        <div class="photo reveal">
-            <img src="assets/photo5.jpg" alt="Memory 5">
-            <div class="photo-overlay">Memory 05</div>
-        </div>
 
         <div class="photo reveal">
-            <img src="assets/photo6.jpg" alt="Memory 6">
-            <div class="photo-overlay">Memory 06</div>
+            <img
+                src="assets/photo3.jpg"
+                alt="Memory 3">
+
+            <div class="photo-overlay">
+                Memory 03
+            </div>
         </div>
 
-        <div class="photo reveal">
-            <img src="assets/photo7.jpg" alt="Memory 7">
-            <div class="photo-overlay">Memory 07</div>
-        </div>
 
         <div class="photo reveal">
-            <img src="assets/photo8.jpg" alt="Memory 8">
-            <div class="photo-overlay">Memory 08</div>
+            <img
+                src="assets/photo4.jpg"
+                alt="Memory 4">
+
+            <div class="photo-overlay">
+                Memory 04
+            </div>
         </div>
+
+
+        <div class="photo reveal">
+            <img
+                src="assets/photo5.jpg"
+                alt="Memory 5">
+
+            <div class="photo-overlay">
+                Memory 05
+            </div>
+        </div>
+
+
+        <div class="photo reveal">
+            <img
+                src="assets/photo6.jpg"
+                alt="Memory 6">
+
+            <div class="photo-overlay">
+                Memory 06
+            </div>
+        </div>
+
+
+        <div class="photo reveal">
+            <img
+                src="assets/photo7.jpg"
+                alt="Memory 7">
+
+            <div class="photo-overlay">
+                Memory 07
+            </div>
+        </div>
+
+
+        <div class="photo reveal">
+            <img
+                src="assets/photo8.jpg"
+                alt="Memory 8">
+
+            <div class="photo-overlay">
+                Memory 08
+            </div>
+        </div>
+
 
     </div>
+
 </section>
 
-<!-- VIDEOS -->
+
+<!-- =====================================================
+     VIDEOS
+===================================================== -->
+
 <section id="videos">
 
     <div class="section-header reveal">
-        <div class="section-label">03 — VIDEO ARCHIVE</div>
-        <h2>Moments In Motion</h2>
+
+        <div class="section-label">
+            03 — VIDEO ARCHIVE
+        </div>
+
+        <h2>
+            Moments In Motion
+        </h2>
+
         <p>
             Karena beberapa kenangan
             lebih hidup ketika diputar kembali.
         </p>
+
     </div>
+
 
     <div class="video-grid">
 
+
         <div class="video-card reveal">
-            <video controls poster="assets/video1-cover.jpg">
-                <source src="assets/video1.mp4" type="video/mp4">
+
+            <video
+                controls
+                poster="assets/video1-cover.jpg">
+
+                <source
+                    src="assets/video1.mp4"
+                    type="video/mp4">
+
             </video>
 
             <div class="video-info">
-                <h3>Memory Video 01</h3>
-                <p>Our little archive</p>
+
+                <h3>
+                    Memory Video 01
+                </h3>
+
+                <p>
+                    Our little archive
+                </p>
+
             </div>
+
         </div>
 
+
         <div class="video-card reveal">
-            <video controls poster="assets/video2-cover.jpg">
-                <source src="assets/video2.mp4" type="video/mp4">
+
+            <video
+                controls
+                poster="assets/video2-cover.jpg">
+
+                <source
+                    src="assets/video2.mp4"
+                    type="video/mp4">
+
             </video>
 
             <div class="video-info">
-                <h3>Memory Video 02</h3>
-                <p>Our little archive</p>
+
+                <h3>
+                    Memory Video 02
+                </h3>
+
+                <p>
+                    Our little archive
+                </p>
+
             </div>
+
         </div>
 
+
         <div class="video-card reveal">
-            <video controls poster="assets/video3-cover.jpg">
-                <source src="assets/video3.mp4" type="video/mp4">
+
+            <video
+                controls
+                poster="assets/video3-cover.jpg">
+
+                <source
+                    src="assets/video3.mp4"
+                    type="video/mp4">
+
             </video>
 
             <div class="video-info">
-                <h3>Memory Video 03</h3>
-                <p>Our little archive</p>
+
+                <h3>
+                    Memory Video 03
+                </h3>
+
+                <p>
+                    Our little archive
+                </p>
+
             </div>
+
         </div>
+
 
     </div>
+
 </section>
 
-<!-- MUSIC -->
-<section class="music-section" id="music">
+
+<!-- =====================================================
+     MUSIC
+===================================================== -->
+
+<section
+    class="music-section"
+    id="music">
 
     <div class="section-header reveal">
-        <div class="section-label">04 — SOUNDTRACK</div>
-        <h2>Our Song</h2>
+
+        <div class="section-label">
+            04 — SOUNDTRACK
+        </div>
+
+        <h2>
+            Our Song
+        </h2>
+
         <p>
             Satu lagu untuk menemani
             perjalanan melihat kembali kenangan.
         </p>
+
     </div>
+
 
     <div class="music-player reveal">
 
         <div class="album">
-            <img src="assets/album.jpg" alt="Album">
+
+            <img
+                src="assets/album.jpg"
+                alt="Album">
+
         </div>
+
 
         <div class="music-info">
-            <div class="music-label">NOW PLAYING</div>
-            <h3>Our Favorite Song</h3>
 
-            <div class="progress" id="progress">
-                <div class="progress-bar" id="progressBar"></div>
+            <div class="music-label">
+                NOW PLAYING
             </div>
+
+            <h3>
+                Our Favorite Song
+            </h3>
+
+
+            <div
+                class="progress"
+                id="progress">
+
+                <div
+                    class="progress-bar"
+                    id="progressBar">
+                </div>
+
+            </div>
+
 
             <div class="controls">
-                <button class="control">⏮</button>
 
-                <button class="control play-btn" id="playBtn">
-                    ▶
+                <button class="control">
+                    ⏮
                 </button>
 
-                <button class="control">⏭</button>
+                <button
+                    class="control play-btn"
+                    id="playBtn">
+
+                    ▶
+
+                </button>
+
+                <button class="control">
+                    ⏭
+                </button>
+
             </div>
+
         </div>
+
     </div>
 
+
     <audio id="audio">
-        <source src="assets/song.mp3" type="audio/mpeg">
+
+        <source
+            src="assets/song.mp3"
+            type="audio/mpeg">
+
     </audio>
+
 </section>
 
-<!-- TIMELINE -->
+
+<!-- =====================================================
+     TIMELINE
+===================================================== -->
+
 <section id="timeline">
 
     <div class="section-header reveal">
-        <div class="section-label">05 — TIMELINE</div>
-        <h2>Through The Years</h2>
+
+        <div class="section-label">
+            05 — TIMELINE
+        </div>
+
+        <h2>
+            Through The Years
+        </h2>
+
         <p>
             Susunan waktu dari berbagai
             foto dan video yang tersimpan.
         </p>
+
     </div>
+
 
     <div class="timeline">
 
+
         <div class="timeline-item reveal">
+
             <div class="timeline-dot"></div>
+
             <div class="timeline-card">
-                <small>01 — MEMORY</small>
-                <h3>The Beginning</h3>
+
+                <small>
+                    01 — MEMORY
+                </small>
+
+                <h3>
+                    The Beginning
+                </h3>
+
                 <p>
                     Tambahkan tanggal dan
                     kenangan pertama di sini.
                 </p>
+
             </div>
+
         </div>
 
+
         <div class="timeline-item reveal">
+
             <div class="timeline-dot"></div>
+
             <div class="timeline-card">
-                <small>02 — MEMORY</small>
-                <h3>First Collection</h3>
+
+                <small>
+                    02 — MEMORY
+                </small>
+
+                <h3>
+                    First Collection
+                </h3>
+
                 <p>
                     Foto dan video dari
                     momen-momen awal.
                 </p>
+
             </div>
+
         </div>
 
+
         <div class="timeline-item reveal">
+
             <div class="timeline-dot"></div>
+
             <div class="timeline-card">
-                <small>03 — MEMORY</small>
-                <h3>More Moments</h3>
+
+                <small>
+                    03 — MEMORY
+                </small>
+
+                <h3>
+                    More Moments
+                </h3>
+
                 <p>
                     Terus tambahkan berbagai
                     momen yang ingin disimpan.
                 </p>
+
             </div>
+
         </div>
 
+
         <div class="timeline-item reveal">
+
             <div class="timeline-dot"></div>
+
             <div class="timeline-card">
-                <small>04 — MEMORY</small>
-                <h3>Still Growing</h3>
+
+                <small>
+                    04 — MEMORY
+                </small>
+
+                <h3>
+                    Still Growing
+                </h3>
+
                 <p>
                     Arsip ini akan terus bertambah
                     seiring waktu.
                 </p>
+
             </div>
+
         </div>
 
+
     </div>
+
 </section>
 
-<!-- DEEP MEMORY -->
+
+<!-- =====================================================
+     DEEP MEMORY
+===================================================== -->
+
 <section class="deep-memory">
 
     <div class="deep-memory-content reveal">
 
-        <div class="deep-label">DEEPER MEMORY</div>
+        <div class="deep-label">
+            DEEPER MEMORY
+        </div>
 
         <h2>
             Some Memories
@@ -1174,27 +3345,44 @@ footer p{color:#527482;font-size:10px;letter-spacing:1px}
             ketika kita ingin mengingatnya.
         </p>
 
+
         <div class="bottle-wrap">
 
-            <div class="memory-bottle" id="memoryBottle">
+            <div
+                class="memory-bottle"
+                id="memoryBottle"
+                title="Open Memory">
+
                 <div class="bottle-cork"></div>
+
                 <div class="bottle-neck"></div>
 
                 <div class="bottle-body">
+
                     <div class="bottle-paper"></div>
+
                 </div>
+
             </div>
 
         </div>
+
     </div>
+
 </section>
 
-<!-- ENDING -->
+
+<!-- =====================================================
+     ENDING
+===================================================== -->
+
 <section class="ending">
 
     <div class="ending-content">
 
-        <div class="ending-symbol">🌊</div>
+        <div class="ending-symbol">
+            🌊
+        </div>
 
         <h2>
             More Memories
@@ -1207,770 +3395,1044 @@ footer p{color:#527482;font-size:10px;letter-spacing:1px}
         </p>
 
     </div>
+
 </section>
 
+
+<!-- =====================================================
+     FOOTER
+===================================================== -->
+
 <footer>
-    <p>OUR OCEAN OF MEMORIES • 2026</p>
+
+    <p>
+        OUR OCEAN OF MEMORIES • 2026
+    </p>
+
 </footer>
 
-<!-- PHOTO MODAL -->
-<div class="modal" id="imageModal">
 
-    <div class="close" id="closeModal">×</div>
+<!-- =====================================================
+     PHOTO MODAL
+===================================================== -->
+
+<div
+    class="modal"
+    id="imageModal">
+
+    <div
+        class="close"
+        id="closeModal">
+
+        ×
+
+    </div>
+
 
     <div class="modal-content">
 
-        <img id="modalImage" src="" alt="Memory">
+        <img
+            id="modalImage"
+            src=""
+            alt="Memory">
 
-        <div class="modal-number" id="modalNumber">
+
+        <div
+            class="modal-number"
+            id="modalNumber">
+
             MEMORY 01
+
         </div>
 
+
         <div class="modal-nav">
-            <button id="prevPhoto">←</button>
-            <button id="nextPhoto">→</button>
+
+            <button
+                id="prevPhoto">
+
+                ←
+
+            </button>
+
+            <button
+                id="nextPhoto">
+
+                →
+
+            </button>
+
         </div>
 
     </div>
+
 </div>
+
 
 <script>
 
-/* LOADER */
-window.addEventListener("load",()=>{
-    setTimeout(()=>{
-        document.getElementById("loader").classList.add("hide");
-    },900);
-});
+/* =====================================================
+   LOADER
+===================================================== */
+
+window.addEventListener(
+    "load",
+    () => {
+
+        setTimeout(
+            () => {
+
+                document
+                    .getElementById("loader")
+                    .classList
+                    .add("hide");
+
+            },
+            900
+        );
+
+    }
+);
 
 
-/* BUBBLES */
-const bubbles=document.getElementById("bubbles");
+/* =====================================================
+   BUBBLES
+===================================================== */
 
-for(let i=0;i<40;i++){
-    const bubble=document.createElement("div");
-    bubble.className="bubble";
+const bubbles =
+    document.getElementById(
+        "bubbles"
+    );
 
-    bubble.style.setProperty("--size",`${Math.random()*18+5}px`);
-    bubble.style.setProperty("--duration",`${Math.random()*12+8}s`);
-    bubble.style.setProperty("--left",`${Math.random()*100}%`);
-    bubble.style.setProperty("--delay",`${Math.random()*12}s`);
+for (
+    let i = 0;
+    i < 40;
+    i++
+) {
 
-    bubbles.appendChild(bubble);
+    const bubble =
+        document.createElement("div");
+
+    bubble.className =
+        "bubble";
+
+    bubble.style.setProperty(
+        "--size",
+        `${Math.random() * 18 + 5}px`
+    );
+
+    bubble.style.setProperty(
+        "--duration",
+        `${Math.random() * 12 + 8}s`
+    );
+
+    bubble.style.setProperty(
+        "--left",
+        `${Math.random() * 100}%`
+    );
+
+    bubble.style.setProperty(
+        "--delay",
+        `${Math.random() * 12}s`
+    );
+
+    bubbles.appendChild(
+        bubble
+    );
 }
 
 
 /* =====================================================
-   INTERACTIVE FISH
+   FISH
 ===================================================== */
 
-const fishContainer=document.getElementById("fishContainer");
+const fishContainer =
+    document.getElementById(
+        "fishContainer"
+    );
 
-const fishTypes=[
-    "nemo",
-    "goldfish",
-    "normal",
-    "normal",
-    "nemo",
-    "goldfish"
+const fishColors = [
+    "#22d3ee",
+    "#38bdf8",
+    "#60a5fa",
+    "#f472b6",
+    "#fb7185",
+    "#facc15",
+    "#a78bfa",
+    "#4ade80",
+    "#fb923c"
 ];
 
-const fishPalettes=[
-    {
-        color:"#22d3ee",
-        light:"#8ff3ff",
-        dark:"#087ea4"
-    },
-    {
-        color:"#60a5fa",
-        light:"#a5ddff",
-        dark:"#2563eb"
-    },
-    {
-        color:"#f472b6",
-        light:"#fbcfe8",
-        dark:"#db2777"
-    },
-    {
-        color:"#a78bfa",
-        light:"#ddd6fe",
-        dark:"#7c3aed"
-    },
-    {
-        color:"#4ade80",
-        light:"#bbf7d0",
-        dark:"#16a34a"
-    },
-    {
-        color:"#fb923c",
-        light:"#fed7aa",
-        dark:"#ea580c"
+for (
+    let i = 0;
+    i < 18;
+    i++
+) {
+
+    const fish =
+        document.createElement("div");
+
+    fish.className =
+        "fish";
+
+    if (
+        i % 4 === 0
+    ) {
+        fish.classList.add(
+            "reverse"
+        );
     }
-];
-
-/* 
-   Ikan dibuat lebih besar:
-   desktop 65–105px
-   HP 55–85px
-*/
-const fishCount=
-    window.innerWidth<550 ? 9 :
-    window.innerWidth<850 ? 13 : 17;
-
-for(let i=0;i<fishCount;i++){
-
-    const fish=document.createElement("div");
-
-    const type=
-        fishTypes[
-            Math.floor(Math.random()*fishTypes.length)
-        ];
-
-    fish.className="fish";
-
-    if(type==="nemo"){
-        fish.classList.add("nemo");
-    }
-
-    if(type==="goldfish"){
-        fish.classList.add("goldfish");
-    }
-
-    if(Math.random()>.62){
-        fish.classList.add("reverse");
-    }
-
-    const palette=
-        fishPalettes[
-            Math.floor(Math.random()*fishPalettes.length)
-        ];
-
-    const size=
-        window.innerWidth<550
-        ? Math.random()*30+55
-        : Math.random()*40+65;
 
     fish.style.setProperty(
         "--fish-size",
-        `${size}px`
+        `${Math.random() * 18 + 15}px`
     );
 
     fish.style.setProperty(
         "--fish-top",
-        `${Math.random()*86+7}%`
+        `${Math.random() * 90 + 5}%`
     );
 
     fish.style.setProperty(
         "--fish-duration",
-        `${Math.random()*18+18}s`
+        `${Math.random() * 18 + 18}s`
     );
 
     fish.style.setProperty(
         "--fish-delay",
-        `${Math.random()*18}s`
+        `${Math.random() * 20}s`
     );
 
     fish.style.setProperty(
         "--fish-opacity",
-        `${Math.random()*.25+.65}`
+        `${Math.random() * .35 + .35}`
     );
 
     fish.style.setProperty(
         "--fish-color",
-        palette.color
+        fishColors[
+            Math.floor(
+                Math.random() *
+                fishColors.length
+            )
+        ]
     );
 
-    fish.style.setProperty(
-        "--fish-light",
-        palette.light
-    );
-
-    fish.style.setProperty(
-        "--fish-dark",
-        palette.dark
-    );
-
-    fish.innerHTML=`
+    fish.innerHTML = `
         <div class="fish-tail"></div>
-        <div class="fish-body">
-            <div class="fish-gill"></div>
-        </div>
+        <div class="fish-body"></div>
         <div class="fish-eye"></div>
     `;
 
-    fishContainer.appendChild(fish);
+    fishContainer.appendChild(
+        fish
+    );
 }
 
 
 /* =====================================================
-   DRAG IKAN DENGAN MOUSE + TOUCH
+   JELLYFISH
 ===================================================== */
 
-let draggedFish=null;
-let dragOffsetX=0;
-let dragOffsetY=0;
-
-function startFishDrag(event){
-
-    draggedFish=event.currentTarget;
-
-    draggedFish.classList.add("dragging");
-
-    const rect=draggedFish.getBoundingClientRect();
-
-    const point=
-        event.touches
-        ? event.touches[0]
-        : event;
-
-    dragOffsetX=point.clientX-rect.left;
-    dragOffsetY=point.clientY-rect.top;
-
-    /* Hentikan sementara posisi animasi */
-    draggedFish.style.left=`${rect.left}px`;
-    draggedFish.style.top=`${rect.top}px`;
-
-    event.preventDefault();
-}
-
-function moveFish(event){
-
-    if(!draggedFish) return;
-
-    const point=
-        event.touches
-        ? event.touches[0]
-        : event;
-
-    let x=point.clientX-dragOffsetX;
-    let y=point.clientY-dragOffsetY;
-
-    const maxX=
-        window.innerWidth-draggedFish.offsetWidth;
-
-    const maxY=
-        window.innerHeight-draggedFish.offsetHeight;
-
-    x=Math.max(0,Math.min(x,maxX));
-    y=Math.max(0,Math.min(y,maxY));
-
-    draggedFish.style.left=`${x}px`;
-    draggedFish.style.top=`${y}px`;
-
-    event.preventDefault();
-}
-
-function endFishDrag(){
-
-    if(!draggedFish) return;
-
-    draggedFish.classList.remove("dragging");
-
-    /*
-       Setelah dilepas, ikan tetap berada
-       di tempat terakhir.
-       Animasi berenang dimatikan supaya
-       ikan tidak langsung kabur kembali.
-    */
-    draggedFish.style.animation="none";
-
-    draggedFish=null;
-}
-
-/* mouse */
-document.querySelectorAll(".fish").forEach(fish=>{
-
-    fish.addEventListener(
-        "mousedown",
-        startFishDrag
+const jellyContainer =
+    document.getElementById(
+        "jellyContainer"
     );
 
-    fish.addEventListener(
-        "touchstart",
-        startFishDrag,
-        {passive:false}
-    );
-
-});
-
-/* gerakan mouse */
-document.addEventListener(
-    "mousemove",
-    moveFish
-);
-
-/* gerakan HP */
-document.addEventListener(
-    "touchmove",
-    moveFish,
-    {passive:false}
-);
-
-document.addEventListener(
-    "mouseup",
-    endFishDrag
-);
-
-document.addEventListener(
-    "touchend",
-    endFishDrag
-);
-
-
-/* JELLYFISH */
-const jellyContainer=document.getElementById("jellyContainer");
-
-const jellyColors=[
+const jellyColors = [
     "#22d3ee",
     "#a78bfa",
     "#f472b6",
     "#60a5fa"
 ];
 
-for(let i=0;i<7;i++){
+for (
+    let i = 0;
+    i < 7;
+    i++
+) {
 
-    const jelly=document.createElement("div");
+    const jelly =
+        document.createElement("div");
 
-    jelly.className="jelly";
+    jelly.className =
+        "jelly";
 
     jelly.style.setProperty(
         "--jelly-size",
-        `${Math.random()*25+35}px`
+        `${Math.random() * 25 + 35}px`
     );
 
     jelly.style.setProperty(
         "--jelly-left",
-        `${Math.random()*95}%`
+        `${Math.random() * 95}%`
     );
 
     jelly.style.setProperty(
         "--jelly-top",
-        `${Math.random()*90+5}%`
+        `${Math.random() * 90 + 5}%`
     );
 
     jelly.style.setProperty(
         "--jelly-duration",
-        `${Math.random()*5+6}s`
+        `${Math.random() * 5 + 6}s`
     );
 
     jelly.style.setProperty(
         "--jelly-delay",
-        `${Math.random()*5}s`
+        `${Math.random() * 5}s`
     );
 
     jelly.style.setProperty(
         "--jelly-color",
         jellyColors[
-            Math.floor(Math.random()*jellyColors.length)
+            Math.floor(
+                Math.random() *
+                jellyColors.length
+            )
         ]
     );
 
-    jelly.innerHTML=`
+    jelly.innerHTML = `
         <div class="jelly-head"></div>
 
         <div class="jelly-tentacles">
+
             <span></span>
             <span></span>
             <span></span>
             <span></span>
+
         </div>
     `;
 
-    jellyContainer.appendChild(jelly);
+    jellyContainer.appendChild(
+        jelly
+    );
 }
 
 
-/* STARS */
-const stars=document.getElementById("stars");
+/* =====================================================
+   STARS
+===================================================== */
 
-for(let i=0;i<80;i++){
+const stars =
+    document.getElementById(
+        "stars"
+    );
 
-    const star=document.createElement("div");
+for (
+    let i = 0;
+    i < 80;
+    i++
+) {
 
-    star.className="star";
+    const star =
+        document.createElement("div");
+
+    star.className =
+        "star";
 
     star.style.setProperty(
         "--star-size",
-        `${Math.random()*3+1}px`
+        `${Math.random() * 3 + 1}px`
     );
 
     star.style.setProperty(
         "--star-left",
-        `${Math.random()*100}%`
+        `${Math.random() * 100}%`
     );
 
     star.style.setProperty(
         "--star-top",
-        `${Math.random()*100}%`
+        `${Math.random() * 100}%`
     );
 
     star.style.setProperty(
         "--star-speed",
-        `${Math.random()*3+2}s`
+        `${Math.random() * 3 + 2}s`
     );
 
     star.style.setProperty(
         "--star-delay",
-        `${Math.random()*5}s`
+        `${Math.random() * 5}s`
     );
 
-    stars.appendChild(star);
+    stars.appendChild(
+        star
+    );
 }
 
 
-/* MOBILE MENU */
-const menuBtn=document.getElementById("menuBtn");
-const navLinks=document.getElementById("navLinks");
+/* =====================================================
+   MOBILE MENU
+===================================================== */
 
-menuBtn.addEventListener("click",()=>{
-    navLinks.classList.toggle("active");
-});
-
-document.querySelectorAll(".nav-links a").forEach(link=>{
-    link.addEventListener("click",()=>{
-        navLinks.classList.remove("active");
-    });
-});
-
-
-/* SCROLL REVEAL */
-const revealElements=document.querySelectorAll(".reveal");
-
-const revealObserver=new IntersectionObserver(
-    entries=>{
-        entries.forEach(entry=>{
-            if(entry.isIntersecting){
-                entry.target.classList.add("show");
-            }
-        });
-    },
-    {threshold:.12}
-);
-
-revealElements.forEach(element=>{
-    revealObserver.observe(element);
-});
-
-
-/* OCEAN DEPTH MODE */
-window.addEventListener("scroll",()=>{
-
-    const scroll=window.scrollY;
-
-    const height=
-        document.body.scrollHeight-
-        window.innerHeight;
-
-    const percentage=scroll/height;
-
-    document.body.classList.remove(
-        "deep-mode",
-        "night-mode"
+const menuBtn =
+    document.getElementById(
+        "menuBtn"
     );
 
-    if(percentage>.68){
+const navLinks =
+    document.getElementById(
+        "navLinks"
+    );
 
-        document.body.classList.add(
+menuBtn.addEventListener(
+    "click",
+    () => {
+
+        navLinks.classList.toggle(
+            "active"
+        );
+
+    }
+);
+
+document
+    .querySelectorAll(
+        ".nav-links a"
+    )
+    .forEach(
+        link => {
+
+            link.addEventListener(
+                "click",
+                () => {
+
+                    navLinks.classList.remove(
+                        "active"
+                    );
+
+                }
+            );
+
+        }
+    );
+
+
+/* =====================================================
+   SCROLL REVEAL
+===================================================== */
+
+const revealElements =
+    document.querySelectorAll(
+        ".reveal"
+    );
+
+const revealObserver =
+    new IntersectionObserver(
+        entries => {
+
+            entries.forEach(
+                entry => {
+
+                    if (
+                        entry.isIntersecting
+                    ) {
+
+                        entry.target
+                            .classList
+                            .add("show");
+
+                    }
+
+                }
+            );
+
+        },
+        {
+            threshold: .12
+        }
+    );
+
+revealElements.forEach(
+    element => {
+
+        revealObserver.observe(
+            element
+        );
+
+    }
+);
+
+
+/* =====================================================
+   OCEAN DEPTH MODE
+===================================================== */
+
+window.addEventListener(
+    "scroll",
+    () => {
+
+        const scroll =
+            window.scrollY;
+
+        const height =
+            document.body.scrollHeight -
+            window.innerHeight;
+
+        const percentage =
+            scroll / height;
+
+
+        document.body.classList.remove(
+            "deep-mode",
             "night-mode"
         );
 
-    }else if(percentage>.38){
 
-        document.body.classList.add(
-            "deep-mode"
-        );
+        if (
+            percentage > .68
+        ) {
 
-    }
-
-});
-
-
-/* HERO PARALLAX */
-window.addEventListener("scroll",()=>{
-
-    const scroll=window.scrollY;
-
-    const hero=document.querySelector(
-        ".hero-content"
-    );
-
-    if(scroll<window.innerHeight){
-
-        hero.style.transform=
-            `translateY(${scroll*.12}px)`;
-
-        hero.style.opacity=
-            Math.max(
-                0,
-                1-scroll/650
+            document.body.classList.add(
+                "night-mode"
             );
+
+        } else if (
+            percentage > .38
+        ) {
+
+            document.body.classList.add(
+                "deep-mode"
+            );
+
+        }
+
     }
-});
+);
 
 
-/* HOURGLASS */
-const hourglassArea=
+/* =====================================================
+   HERO PARALLAX
+===================================================== */
+
+window.addEventListener(
+    "scroll",
+    () => {
+
+        const scroll =
+            window.scrollY;
+
+        const hero =
+            document.querySelector(
+                ".hero-content"
+            );
+
+        if (
+            scroll <
+            window.innerHeight
+        ) {
+
+            hero.style.transform =
+                `translateY(${scroll * .12}px)`;
+
+            hero.style.opacity =
+                Math.max(
+                    0,
+                    1 - scroll / 650
+                );
+
+        }
+
+    }
+);
+
+
+/* =====================================================
+   HOURGLASS AUTO FLIP
+===================================================== */
+
+const hourglassArea =
     document.getElementById(
         "hourglassArea"
     );
 
-let hourglassFlip=false;
+let hourglassFlip =
+    false;
 
-setInterval(()=>{
+setInterval(
+    () => {
 
-    hourglassFlip=!hourglassFlip;
+        hourglassFlip =
+            !hourglassFlip;
 
-    hourglassArea.classList.toggle(
-        "flip",
-        hourglassFlip
-    );
+        hourglassArea.classList.toggle(
+            "flip",
+            hourglassFlip
+        );
 
-},11000);
+    },
+    11000
+);
 
 
-/* PHOTO MODAL */
-const photoImages=
+/* =====================================================
+   PHOTO MODAL
+===================================================== */
+
+const photoImages =
     Array.from(
-        document.querySelectorAll(".photo img")
+        document.querySelectorAll(
+            ".photo img"
+        )
     );
 
-const modal=
-    document.getElementById("imageModal");
+const modal =
+    document.getElementById(
+        "imageModal"
+    );
 
-const modalImage=
-    document.getElementById("modalImage");
+const modalImage =
+    document.getElementById(
+        "modalImage"
+    );
 
-const modalNumber=
-    document.getElementById("modalNumber");
+const modalNumber =
+    document.getElementById(
+        "modalNumber"
+    );
 
-const closeModal=
-    document.getElementById("closeModal");
+const closeModal =
+    document.getElementById(
+        "closeModal"
+    );
 
-const nextPhoto=
-    document.getElementById("nextPhoto");
+const nextPhoto =
+    document.getElementById(
+        "nextPhoto"
+    );
 
-const prevPhoto=
-    document.getElementById("prevPhoto");
+const prevPhoto =
+    document.getElementById(
+        "prevPhoto"
+    );
 
-let currentPhoto=0;
+let currentPhoto = 0;
 
-function showPhoto(index){
 
-    if(index<0){
-        index=photoImages.length-1;
+function showPhoto(index) {
+
+    if (
+        index < 0
+    ) {
+        index =
+            photoImages.length - 1;
     }
 
-    if(index>=photoImages.length){
-        index=0;
+    if (
+        index >= photoImages.length
+    ) {
+        index = 0;
     }
 
-    currentPhoto=index;
+    currentPhoto =
+        index;
 
-    modalImage.src=
+    modalImage.src =
         photoImages[index].src;
 
-    modalNumber.textContent=
-        `MEMORY ${String(index+1).padStart(2,"0")}`;
+    modalNumber.textContent =
+        `MEMORY ${String(index + 1).padStart(2,"0")}`;
 
-    modal.classList.add("active");
+    modal.classList.add(
+        "active"
+    );
 }
 
-photoImages.forEach((image,index)=>{
 
-    image.addEventListener("click",()=>{
-        showPhoto(index);
-    });
+photoImages.forEach(
+    (image, index) => {
 
-});
+        image.addEventListener(
+            "click",
+            () => {
 
-nextPhoto.addEventListener("click",()=>{
-    showPhoto(currentPhoto+1);
-});
+                showPhoto(index);
 
-prevPhoto.addEventListener("click",()=>{
-    showPhoto(currentPhoto-1);
-});
-
-closeModal.addEventListener("click",()=>{
-    modal.classList.remove("active");
-});
-
-modal.addEventListener("click",event=>{
-
-    if(event.target===modal){
-        modal.classList.remove("active");
-    }
-
-});
-
-
-/* KEYBOARD */
-document.addEventListener("keydown",event=>{
-
-    if(!modal.classList.contains("active")) return;
-
-    if(event.key==="ArrowRight"){
-        showPhoto(currentPhoto+1);
-    }
-
-    if(event.key==="ArrowLeft"){
-        showPhoto(currentPhoto-1);
-    }
-
-    if(event.key==="Escape"){
-        modal.classList.remove("active");
-    }
-
-});
-
-
-/* MUSIC */
-const audio=document.getElementById("audio");
-const playBtn=document.getElementById("playBtn");
-const progress=document.getElementById("progress");
-const progressBar=document.getElementById("progressBar");
-
-playBtn.addEventListener("click",()=>{
-
-    if(audio.paused){
-
-        audio.play();
-
-        playBtn.textContent="Ⅱ";
-
-    }else{
-
-        audio.pause();
-
-        playBtn.textContent="▶";
+            }
+        );
 
     }
-
-});
-
-audio.addEventListener("timeupdate",()=>{
-
-    if(!audio.duration) return;
-
-    const percentage=
-        audio.currentTime/
-        audio.duration*100;
-
-    progressBar.style.width=
-        `${percentage}%`;
-
-});
-
-progress.addEventListener("click",event=>{
-
-    if(!audio.duration) return;
-
-    const width=progress.clientWidth;
-    const clickPosition=event.offsetX;
-
-    audio.currentTime=
-        clickPosition/width*
-        audio.duration;
-
-});
-
-audio.addEventListener("ended",()=>{
-
-    playBtn.textContent="▶";
-    progressBar.style.width="0%";
-
-});
+);
 
 
-/* COUNTERS */
-const photoCount=
-    document.querySelectorAll(".photo").length;
+nextPhoto.addEventListener(
+    "click",
+    () => {
 
-document.getElementById("photoCount").textContent=
-    String(photoCount).padStart(2,"0");
+        showPhoto(
+            currentPhoto + 1
+        );
 
-const videoCount=
-    document.querySelectorAll(".video-card").length;
-
-document.getElementById("videoCount").textContent=
-    String(videoCount).padStart(2,"0");
+    }
+);
 
 
-/* CURSOR BUBBLES */
-let lastBubble=0;
+prevPhoto.addEventListener(
+    "click",
+    () => {
 
-document.addEventListener("mousemove",event=>{
+        showPhoto(
+            currentPhoto - 1
+        );
 
-    const now=Date.now();
+    }
+);
 
-    if(now-lastBubble<140) return;
 
-    lastBubble=now;
+closeModal.addEventListener(
+    "click",
+    () => {
 
-    const bubble=document.createElement("div");
+        modal.classList.remove(
+            "active"
+        );
 
-    bubble.className="cursor-bubble";
+    }
+);
 
-    bubble.style.setProperty(
-        "--cursor-x",
-        `${event.clientX}px`
+
+modal.addEventListener(
+    "click",
+    event => {
+
+        if (
+            event.target === modal
+        ) {
+
+            modal.classList.remove(
+                "active"
+            );
+
+        }
+
+    }
+);
+
+
+/* =====================================================
+   KEYBOARD PHOTO NAVIGATION
+===================================================== */
+
+document.addEventListener(
+    "keydown",
+    event => {
+
+        if (
+            !modal.classList.contains(
+                "active"
+            )
+        ) return;
+
+
+        if (
+            event.key === "ArrowRight"
+        ) {
+
+            showPhoto(
+                currentPhoto + 1
+            );
+
+        }
+
+
+        if (
+            event.key === "ArrowLeft"
+        ) {
+
+            showPhoto(
+                currentPhoto - 1
+            );
+
+        }
+
+
+        if (
+            event.key === "Escape"
+        ) {
+
+            modal.classList.remove(
+                "active"
+            );
+
+        }
+
+    }
+);
+
+
+/* =====================================================
+   MUSIC PLAYER
+===================================================== */
+
+const audio =
+    document.getElementById(
+        "audio"
     );
 
-    bubble.style.setProperty(
-        "--cursor-y",
-        `${event.clientY}px`
+const playBtn =
+    document.getElementById(
+        "playBtn"
     );
 
-    bubble.style.setProperty(
-        "--cursor-size",
-        `${Math.random()*7+4}px`
+const progress =
+    document.getElementById(
+        "progress"
     );
 
-    document.body.appendChild(bubble);
-
-    setTimeout(()=>{
-        bubble.remove();
-    },1800);
-
-});
+const progressBar =
+    document.getElementById(
+        "progressBar"
+    );
 
 
-/* MEMORY BOTTLE */
-const memoryBottle=
-    document.getElementById("memoryBottle");
+playBtn.addEventListener(
+    "click",
+    () => {
 
-memoryBottle.addEventListener("click",()=>{
-    showPhoto(0);
-});
+        if (
+            audio.paused
+        ) {
 
+            audio.play();
 
-/* TOUCH SWIPE PHOTO */
-let touchStartX=0;
+            playBtn.textContent =
+                "Ⅱ";
 
-modal.addEventListener("touchstart",event=>{
+        } else {
 
-    touchStartX=
-        event.changedTouches[0].screenX;
+            audio.pause();
 
-});
+            playBtn.textContent =
+                "▶";
 
-modal.addEventListener("touchend",event=>{
+        }
 
-    const touchEndX=
-        event.changedTouches[0].screenX;
-
-    const distance=
-        touchEndX-touchStartX;
-
-    if(Math.abs(distance)<50) return;
-
-    if(distance<0){
-        showPhoto(currentPhoto+1);
-    }else{
-        showPhoto(currentPhoto-1);
     }
+);
 
-});
+
+audio.addEventListener(
+    "timeupdate",
+    () => {
+
+        if (
+            !audio.duration
+        ) return;
+
+        const percentage =
+            (
+                audio.currentTime /
+                audio.duration
+            ) * 100;
+
+        progressBar.style.width =
+            `${percentage}%`;
+
+    }
+);
+
+
+progress.addEventListener(
+    "click",
+    event => {
+
+        if (
+            !audio.duration
+        ) return;
+
+        const width =
+            progress.clientWidth;
+
+        const clickPosition =
+            event.offsetX;
+
+        audio.currentTime =
+            (
+                clickPosition /
+                width
+            ) *
+            audio.duration;
+
+    }
+);
+
+
+audio.addEventListener(
+    "ended",
+    () => {
+
+        playBtn.textContent =
+            "▶";
+
+        progressBar.style.width =
+            "0%";
+
+    }
+);
+
+
+/* =====================================================
+   COUNTERS
+===================================================== */
+
+const photoCount =
+    document.querySelectorAll(
+        ".photo"
+    ).length;
+
+document.getElementById(
+    "photoCount"
+).textContent =
+    String(photoCount)
+        .padStart(2, "0");
+
+
+const videoCount =
+    document.querySelectorAll(
+        ".video-card"
+    ).length;
+
+document.getElementById(
+    "videoCount"
+).textContent =
+    String(videoCount)
+        .padStart(2, "0");
+
+
+/* =====================================================
+   CURSOR BUBBLES
+===================================================== */
+
+let lastBubble =
+    0;
+
+document.addEventListener(
+    "mousemove",
+    event => {
+
+        const now =
+            Date.now();
+
+        if (
+            now - lastBubble < 140
+        ) return;
+
+        lastBubble =
+            now;
+
+        const bubble =
+            document.createElement(
+                "div"
+            );
+
+        bubble.className =
+            "cursor-bubble";
+
+        bubble.style.setProperty(
+            "--cursor-x",
+            `${event.clientX}px`
+        );
+
+        bubble.style.setProperty(
+            "--cursor-y",
+            `${event.clientY}px`
+        );
+
+        bubble.style.setProperty(
+            "--cursor-size",
+            `${Math.random() * 7 + 4}px`
+        );
+
+        document.body.appendChild(
+            bubble
+        );
+
+        setTimeout(
+            () => {
+
+                bubble.remove();
+
+            },
+            1800
+        );
+
+    }
+);
+
+
+/* =====================================================
+   MEMORY BOTTLE
+===================================================== */
+
+const memoryBottle =
+    document.getElementById(
+        "memoryBottle"
+    );
+
+memoryBottle.addEventListener(
+    "click",
+    () => {
+
+        showPhoto(0);
+
+    }
+);
+
+
+/* =====================================================
+   TOUCH SWIPE FOR PHOTO MODAL
+===================================================== */
+
+let touchStartX = 0;
+
+modal.addEventListener(
+    "touchstart",
+    event => {
+
+        touchStartX =
+            event.changedTouches[0].screenX;
+
+    }
+);
+
+
+modal.addEventListener(
+    "touchend",
+    event => {
+
+        const touchEndX =
+            event.changedTouches[0].screenX;
+
+        const distance =
+            touchEndX - touchStartX;
+
+
+        if (
+            Math.abs(distance) < 50
+        ) return;
+
+
+        if (
+            distance < 0
+        ) {
+
+            showPhoto(
+                currentPhoto + 1
+            );
+
+        } else {
+
+            showPhoto(
+                currentPhoto - 1
+            );
+
+        }
+
+    }
+);
 
 </script>
 
